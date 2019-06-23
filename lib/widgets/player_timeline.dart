@@ -6,7 +6,7 @@ class PlayerTimeline extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: AppSpace.md),
+      padding: EdgeInsets.only(top: AppSpace.md),
       child: Column(
         children: <Widget>[
           Row(

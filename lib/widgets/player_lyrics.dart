@@ -30,6 +30,7 @@ class PlayerLyrics extends StatelessWidget {
     return Container(
       height: 55,
       child: SingleChildScrollView(
+        physics: NeverScrollableScrollPhysics(),
         child: RichText(
           textAlign: TextAlign.center,
           text: TextSpan(

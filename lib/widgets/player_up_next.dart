@@ -4,14 +4,19 @@ import 'package:simple_music_player/resources/colors.dart';
 import 'package:simple_music_player/resources/sizes.dart';
 
 class PlayerUpNext extends StatelessWidget {
+  final onPlaylistTap;
   const PlayerUpNext({
     Key key,
+    this.onPlaylistTap,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.all(AppSpace.sm),
+      height: MediaQuery.of(context).size.height - 200,
+      padding: EdgeInsets.only(
+        top: 10,
+      ),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.only(
@@ -26,29 +31,43 @@ class PlayerUpNext extends StatelessWidget {
           )
         ],
       ),
-      child: Column(
-        children: <Widget>[
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: <Widget>[
-              Text(
-                'Up Next',
-                style: TextStyle(
-                    color: secondaryText,
-                    fontWeight: FontWeight.w600),
+      child: SafeArea(
+        top: false,
+              child: Column(
+          children: <Widget>[
+            Material(
+              color: Colors.transparent,
+                        child: Row(
+                children: <Widget>[
+                  SizedBox(width: AppSpace.sm,),
+                  Text(
+                    'Up Next',
+                    style: TextStyle(
+                        color: secondaryText, fontWeight: FontWeight.w600),
+                  ),
+                  Expanded(child: Container(),),
+                  IconButton(
+                      onPressed: onPlaylistTap,
+                      icon: Icon(
+                        Icons.playlist_play,
+                        color: secondaryText,
+                      ),
+                      iconSize: 30,
+                    ),
+                  SizedBox(width: 10,),
+                ],
               ),
-              Icon(Icons.playlist_play, size: 25,)
-            ],
-          ),
-          SafeArea(
-                      child: ListView.builder(
-                        shrinkWrap: true,
-                        scrollDirection: Axis.vertical,
-                        physics: ClampingScrollPhysics(),
-              itemCount: 5,
-              itemBuilder: (BuildContext context, int index) => Row(
-                    children: <Widget>[
-                      Container(
+            ),
+            Expanded(
+              child: ListView.builder(
+                itemCount: 15,
+                physics: BouncingScrollPhysics(),
+                padding: EdgeInsets.symmetric(
+                  horizontal: AppSpace.sm,
+                ),
+                itemBuilder: (BuildContext context, int index) => ListTile(
+                  onTap: () => null,
+                      leading: Container(
                         height: 50,
                         width: 50,
                         decoration: BoxDecoration(
@@ -59,18 +78,41 @@ class PlayerUpNext extends StatelessWidget {
                           borderRadius: BorderRadius.circular(3.0),
                           boxShadow: [
                             BoxShadow(
-                              color: Color.fromRGBO(50, 50, 50, 0.4),
-                              blurRadius: 2,
+                              color: Color.fromRGBO(50, 50, 50, 0.3),
+                              blurRadius: 10,
                               offset: Offset(1.0, 1.0),
                             )
                           ],
                         ),
                       ),
-                    ],
-                  ),
+                      title: Text(
+                        'Twentyone Pilots',
+                        style: TextStyle(
+                            fontWeight: FontWeight.w500,
+                            color: Colors.grey,
+                            fontSize: AppFont.sm),
+                      ),
+                      subtitle: Text(
+                        'Honour and Us',
+                        style: TextStyle(
+                            fontWeight: FontWeight.w700,
+                            color: secondaryText,
+                            fontSize: AppFont.md - 3,
+                            height: 1.5),
+                      ),
+                      trailing: Text(
+                        '03:37',
+                        style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            color: Colors.grey,
+                            fontSize: AppFont.sm + 1),
+                      ),
+                      contentPadding: EdgeInsets.symmetric(horizontal: 0),
+                    ),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
