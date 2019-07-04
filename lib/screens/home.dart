@@ -24,6 +24,14 @@ class _HomeState extends State<Home> {
     );
   }
 
+  _onPanUpdate(double panPercentValue) {
+    setState(() {
+      panPercent = panPercentValue;
+    });
+  }
+
+  _onPanEnd() {}
+
   @override
   Widget build(BuildContext context) {
     return Stack(
@@ -34,14 +42,19 @@ class _HomeState extends State<Home> {
           ),
         ),
         Transform.translate(
-          offset: Offset(0.0, lerpDouble(0, MediaQuery.of(context).size.height - 100, panPercent)),
+          offset: Offset(
+              0.0, ((MediaQuery.of(context).size.height - 100) * panPercent)),
           child: Scaffold(
             body: ListView(
-              physics: ClampingScrollPhysics(),
+              physics: NeverScrollableScrollPhysics(),
               controller: scrollController,
-              padding: EdgeInsets.only(bottom: 0),
+              padding: EdgeInsets.all(0.0),
               children: <Widget>[
-                PlayerContainer(panPercent: panPercent),
+                PlayerContainer(
+                  panPercent: panPercent,
+                  panUpdateCallback: _onPanUpdate,
+                  panEndCallback: _onPanEnd,
+                ),
                 PlayerUpNext(
                   onPlaylistTap: _onPlaylistTap,
                 ),
