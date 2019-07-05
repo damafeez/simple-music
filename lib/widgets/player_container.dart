@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -13,26 +14,62 @@ class PlayerContainer extends StatefulWidget {
   final double panPercent;
   final Function(double) panUpdateCallback;
   final Function panEndCallback;
+  final StreamController closeStreamController;
 
   PlayerContainer({
     this.panPercent,
     @required this.panUpdateCallback,
     @required this.panEndCallback,
+    @required this.closeStreamController,
   });
 
   @override
   _PlayerContainerState createState() => _PlayerContainerState();
 }
 
-class _PlayerContainerState extends State<PlayerContainer> {
+class _PlayerContainerState extends State<PlayerContainer>
+    with SingleTickerProviderStateMixin {
   final minAlbulmArtWidth = 50.0;
-  final dragAutoCompletePercent = 0.4;
+  final dragAutoCompletePercent = 0.35;
 
   double startDragY;
   double startDragPercent;
   double dragDistance;
   double dragPercent;
-  DragIntent dragIntent = DragIntent.none;
+  DragDirection dragDirection = DragDirection.none;
+
+  Tween<double> dragAutoCompleteAnimationTween;
+  AnimationController dragAutoCompleteAnimationController;
+  CurvedAnimation curvedAnimation;
+
+  @override
+  void initState() {
+    dragAutoCompleteAnimationController =
+        AnimationController(duration: Duration(milliseconds: 220), vsync: this)
+          ..addListener(() {
+            widget.panUpdateCallback(dragAutoCompleteAnimationTween
+                .evaluate(curvedAnimation));
+          })
+          ..addStatusListener((AnimationStatus status) {
+            if (status == AnimationStatus.completed) {
+              dragDirection = DragDirection.none;
+              dragAutoCompleteAnimationTween = null;
+            }
+          });
+
+
+    curvedAnimation = CurvedAnimation(parent: dragAutoCompleteAnimationController, curve: Curves.easeOut);
+
+    widget.closeStreamController.stream.listen((data) {
+      _animateContainer(false);
+    });
+  }
+
+  @override
+  void dispose() {
+    dragAutoCompleteAnimationController.dispose();
+    super.dispose();
+  }
 
   void _onPanStart(DragStartDetails details) {
     startDragY = details.globalPosition.dy;
@@ -44,11 +81,11 @@ class _PlayerContainerState extends State<PlayerContainer> {
       dragDistance = details.globalPosition.dy - startDragY;
 
       if (dragDistance > 0 && startDragPercent == 0)
-        dragIntent = DragIntent.close;
+        dragDirection = DragDirection.down;
       else if (dragDistance < 0 && startDragPercent == 1)
-        dragIntent = DragIntent.open;
+        dragDirection = DragDirection.up;
       else
-        dragIntent = DragIntent.none;
+        dragDirection = DragDirection.none;
 
       final fullDragHeight = context.size.height - 100;
 
@@ -60,17 +97,29 @@ class _PlayerContainerState extends State<PlayerContainer> {
   }
 
   void _onPanEnd(DragEndDetails dragEndDetails) {
-    if (dragIntent == DragIntent.close) {
-      widget.panUpdateCallback(
-          dragPercent.abs() >= dragAutoCompletePercent ? 1.0 : 0.0);
-    } else if (dragIntent == DragIntent.open) {
-      widget.panUpdateCallback(
-          dragPercent.abs() >= dragAutoCompletePercent ? 0.0 : 1.0);
+    if (dragDirection == DragDirection.down) {
+      _animateContainer(
+          dragPercent.abs() >= dragAutoCompletePercent ? false : true);
+    } else if (dragDirection == DragDirection.up) {
+      _animateContainer(
+          dragPercent.abs() >= dragAutoCompletePercent ? true : false);
     }
     startDragY = null;
     startDragPercent = null;
-    dragIntent = DragIntent.none;
     widget.panEndCallback();
+  }
+
+  void _animateContainer(open) {
+    if ((open && widget.panPercent == 0.0) ||
+        (!open && widget.panPercent == 1.0)) return;
+
+    // calculate duraction based on distance to end
+    final distanceToEnd = (widget.panPercent - (open ? 0.0 : 1.0)).abs();
+    dragAutoCompleteAnimationController.duration = Duration(milliseconds: (250 * distanceToEnd).clamp(100, 250).round());
+
+    dragAutoCompleteAnimationTween =
+        Tween(begin: widget.panPercent, end: open ? 0.0 : 1.0);
+    dragAutoCompleteAnimationController.forward(from: 0.0);
   }
 
   @override
@@ -79,64 +128,62 @@ class _PlayerContainerState extends State<PlayerContainer> {
       onVerticalDragStart: _onPanStart,
       onVerticalDragUpdate: _onPanUpdate,
       onVerticalDragEnd: _onPanEnd,
+      onTap: () => _animateContainer(true),
       child: Container(
-        color: background,
+        color: Colors.transparent,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Transform.translate(
               offset: Offset(0, 250.0 * widget.panPercent),
-              child: SafeArea(
-                bottom: false,
-                child: Opacity(
-                  opacity: (1 - 2 * widget.panPercent).clamp(0.0, 1.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: <Widget>[
-                      IconButton(
-                        icon: Icon(
-                          Icons.arrow_back,
-                          color: primary,
-                        ),
-                        onPressed: () {},
+              child: Opacity(
+                opacity: (1 - 2 * widget.panPercent).clamp(0.0, 1.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    IconButton(
+                      icon: Icon(
+                        Icons.arrow_back,
+                        color: primary,
                       ),
-                      Padding(
-                        padding: EdgeInsets.only(
-                            top: AppSpace.sm, bottom: AppSpace.md),
-                        child: RichText(
-                          textAlign: TextAlign.center,
-                          text: TextSpan(
-                              text: '',
-                              style: TextStyle(
-                                color: primary,
-                                fontWeight: FontWeight.w700,
-                                fontSize: AppFont.md,
-                              ),
-                              children: <TextSpan>[
-                                TextSpan(text: 'Cheap Thrills\n'),
-                                TextSpan(
-                                    text: 'Sia',
-                                    style: TextStyle(
-                                        color: secondaryText,
-                                        fontSize: AppFont.md - 3,
-                                        height: 1.5)),
-                              ]),
-                        ),
+                      onPressed: () => _animateContainer(false),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.only(
+                          top: AppSpace.md + 20, bottom: AppSpace.md),
+                      child: RichText(
+                        textAlign: TextAlign.center,
+                        text: TextSpan(
+                            text: '',
+                            style: TextStyle(
+                              color: primary,
+                              fontWeight: FontWeight.w700,
+                              fontSize: AppFont.md,
+                            ),
+                            children: <TextSpan>[
+                              TextSpan(text: 'Cheap Thrills\n'),
+                              TextSpan(
+                                  text: 'Sia',
+                                  style: TextStyle(
+                                      color: secondaryText,
+                                      fontSize: AppFont.md - 3,
+                                      height: 1.5)),
+                            ]),
                       ),
-                      IconButton(
-                        icon: Icon(
-                          Icons.more_vert,
-                          color: primary,
-                        ),
-                        onPressed: () {},
+                    ),
+                    IconButton(
+                      icon: Icon(
+                        Icons.more_vert,
+                        color: primary,
                       ),
-                    ],
-                  ),
+                      onPressed: () {},
+                    ),
+                  ],
                 ),
               ),
             ),
             Transform.translate(
-              offset: Offset(0, -100 * widget.panPercent),
+              offset: Offset(0, -110 * widget.panPercent),
               child: Padding(
                 padding: EdgeInsets.symmetric(horizontal: AppSpace.sm),
                 child: LayoutBuilder(
@@ -176,8 +223,8 @@ class _PlayerContainerState extends State<PlayerContainer> {
                 ),
               ),
             ),
-          Transform.translate(
-            offset: Offset(0, 200 * widget.panPercent),
+            Transform.translate(
+              offset: Offset(0, 200 * widget.panPercent),
               child: Padding(
                 padding: EdgeInsets.only(
                   left: AppSpace.sm,
@@ -200,8 +247,8 @@ class _PlayerContainerState extends State<PlayerContainer> {
   }
 }
 
-enum DragIntent {
-  open,
-  close,
+enum DragDirection {
+  up,
+  down,
   none,
 }

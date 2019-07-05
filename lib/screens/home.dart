@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -11,7 +12,10 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   final ScrollController scrollController = ScrollController();
+  StreamController closeMusicContainer;
   double panPercent = 0.0;
+
+  _HomeState() : closeMusicContainer = StreamController();
 
   _onPlaylistTap() {
     final double scrollBottom = scrollController.position.maxScrollExtent;
@@ -34,35 +38,45 @@ class _HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: <Widget>[
-        Scaffold(
-          body: Container(
-            color: Colors.red,
-          ),
-        ),
-        Transform.translate(
-          offset: Offset(
-              0.0, ((MediaQuery.of(context).size.height - 100) * panPercent)),
-          child: Scaffold(
-            body: ListView(
-              physics: NeverScrollableScrollPhysics(),
-              controller: scrollController,
-              padding: EdgeInsets.all(0.0),
-              children: <Widget>[
-                PlayerContainer(
-                  panPercent: panPercent,
-                  panUpdateCallback: _onPanUpdate,
-                  panEndCallback: _onPanEnd,
-                ),
-                PlayerUpNext(
-                  onPlaylistTap: _onPlaylistTap,
-                ),
-              ],
+    return WillPopScope(
+      onWillPop: () => Future((){
+        if (panPercent == 1.0) {
+          return true;
+        } else {
+          closeMusicContainer.add('close');
+        }
+      }),
+      child: Stack(
+        children: <Widget>[
+          Scaffold(
+            body: Container(
+              color: Colors.red,
             ),
           ),
-        )
-      ],
+          Transform.translate(
+            offset: Offset(
+                0.0, ((MediaQuery.of(context).size.height - 100) * panPercent)),
+            child: Scaffold(
+              body: ListView(
+                physics: NeverScrollableScrollPhysics(),
+                controller: scrollController,
+                padding: EdgeInsets.all(0.0),
+                children: <Widget>[
+                  PlayerContainer(
+                    panPercent: panPercent,
+                    panUpdateCallback: _onPanUpdate,
+                    panEndCallback: _onPanEnd,
+                    closeStreamController: closeMusicContainer,
+                  ),
+                  PlayerUpNext(
+                    onPlaylistTap: _onPlaylistTap,
+                  ),
+                ],
+              ),
+            ),
+          )
+        ],
+      ),
     );
   }
 }

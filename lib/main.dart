@@ -9,7 +9,7 @@ class Application extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Flutter Demo',
+      title: 'Simple Music',
       theme: _buildThemeData(),
       home: Home(),
     );
