@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:ui';
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:simple_music_player/data/fixtures/lyrics.dart';
 import 'package:simple_music_player/resources/assets.dart';
@@ -13,13 +14,13 @@ import 'package:simple_music_player/widgets/player_timeline.dart';
 class PlayerContainer extends StatefulWidget {
   final double panPercent;
   final Function(double) panUpdateCallback;
-  final Function panEndCallback;
+  final ScrollController scaffoldScrollController;
   final StreamController closeStreamController;
 
   PlayerContainer({
     this.panPercent,
     @required this.panUpdateCallback,
-    @required this.panEndCallback,
+    @required this.scaffoldScrollController,
     @required this.closeStreamController,
   });
 
@@ -47,8 +48,8 @@ class _PlayerContainerState extends State<PlayerContainer>
     dragAutoCompleteAnimationController =
         AnimationController(duration: Duration(milliseconds: 220), vsync: this)
           ..addListener(() {
-            widget.panUpdateCallback(dragAutoCompleteAnimationTween
-                .evaluate(curvedAnimation));
+            widget.panUpdateCallback(
+                dragAutoCompleteAnimationTween.evaluate(curvedAnimation));
           })
           ..addStatusListener((AnimationStatus status) {
             if (status == AnimationStatus.completed) {
@@ -57,8 +58,8 @@ class _PlayerContainerState extends State<PlayerContainer>
             }
           });
 
-
-    curvedAnimation = CurvedAnimation(parent: dragAutoCompleteAnimationController, curve: Curves.easeOut);
+    curvedAnimation = CurvedAnimation(
+        parent: dragAutoCompleteAnimationController, curve: Curves.easeOut);
 
     widget.closeStreamController.stream.listen((data) {
       _animateContainer(false);
@@ -72,11 +73,17 @@ class _PlayerContainerState extends State<PlayerContainer>
   }
 
   void _onPanStart(DragStartDetails details) {
+    if (widget.scaffoldScrollController.offset !=
+        widget.scaffoldScrollController.position.minScrollExtent) return;
+
     startDragY = details.globalPosition.dy;
     startDragPercent = widget.panPercent;
   }
 
   void _onPanUpdate(DragUpdateDetails details) {
+    if (widget.scaffoldScrollController.offset !=
+        widget.scaffoldScrollController.position.minScrollExtent) return;
+
     if (startDragY != null) {
       dragDistance = details.globalPosition.dy - startDragY;
 
@@ -97,6 +104,9 @@ class _PlayerContainerState extends State<PlayerContainer>
   }
 
   void _onPanEnd(DragEndDetails dragEndDetails) {
+    if (widget.scaffoldScrollController.offset !=
+        widget.scaffoldScrollController.position.minScrollExtent) return;
+
     if (dragDirection == DragDirection.down) {
       _animateContainer(
           dragPercent.abs() >= dragAutoCompletePercent ? false : true);
@@ -106,16 +116,26 @@ class _PlayerContainerState extends State<PlayerContainer>
     }
     startDragY = null;
     startDragPercent = null;
-    widget.panEndCallback();
   }
 
   void _animateContainer(open) {
     if ((open && widget.panPercent == 0.0) ||
         (!open && widget.panPercent == 1.0)) return;
 
+    final double scrollTop =
+        widget.scaffoldScrollController.position.minScrollExtent;
+
+    if (widget.scaffoldScrollController.offset != scrollTop) {
+      widget.scaffoldScrollController.animateTo(
+        scrollTop,
+        duration: Duration(milliseconds: 100),
+        curve: Curves.easeInOut,
+      );
+    }
     // calculate duraction based on distance to end
     final distanceToEnd = (widget.panPercent - (open ? 0.0 : 1.0)).abs();
-    dragAutoCompleteAnimationController.duration = Duration(milliseconds: (250 * distanceToEnd).clamp(100, 250).round());
+    dragAutoCompleteAnimationController.duration =
+        Duration(milliseconds: (250 * distanceToEnd).clamp(100, 250).round());
 
     dragAutoCompleteAnimationTween =
         Tween(begin: widget.panPercent, end: open ? 0.0 : 1.0);

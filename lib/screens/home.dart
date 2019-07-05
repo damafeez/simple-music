@@ -58,14 +58,14 @@ class _HomeState extends State<Home> {
                 0.0, ((MediaQuery.of(context).size.height - 100) * panPercent)),
             child: Scaffold(
               body: ListView(
-                physics: NeverScrollableScrollPhysics(),
+                physics: ClampingScrollPhysics(),
                 controller: scrollController,
                 padding: EdgeInsets.all(0.0),
                 children: <Widget>[
                   PlayerContainer(
                     panPercent: panPercent,
                     panUpdateCallback: _onPanUpdate,
-                    panEndCallback: _onPanEnd,
+                    scaffoldScrollController: scrollController,
                     closeStreamController: closeMusicContainer,
                   ),
                   PlayerUpNext(

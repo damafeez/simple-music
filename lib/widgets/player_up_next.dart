@@ -33,28 +33,34 @@ class PlayerUpNext extends StatelessWidget {
       ),
       child: SafeArea(
         top: false,
-              child: Column(
+        child: Column(
           children: <Widget>[
             Material(
               color: Colors.transparent,
-                        child: Row(
+              child: Row(
                 children: <Widget>[
-                  SizedBox(width: AppSpace.sm,),
+                  SizedBox(
+                    width: AppSpace.sm,
+                  ),
                   Text(
                     'Up Next',
                     style: TextStyle(
                         color: secondaryText, fontWeight: FontWeight.w600),
                   ),
-                  Expanded(child: Container(),),
+                  Expanded(
+                    child: Container(),
+                  ),
                   IconButton(
-                      onPressed: onPlaylistTap,
-                      icon: Icon(
-                        Icons.playlist_play,
-                        color: secondaryText,
-                      ),
-                      iconSize: 30,
+                    onPressed: onPlaylistTap,
+                    icon: Icon(
+                      Icons.playlist_play,
+                      color: secondaryText,
                     ),
-                  SizedBox(width: 10,),
+                    iconSize: 30,
+                  ),
+                  SizedBox(
+                    width: 10,
+                  ),
                 ],
               ),
             ),
@@ -66,7 +72,7 @@ class PlayerUpNext extends StatelessWidget {
                   horizontal: AppSpace.sm,
                 ),
                 itemBuilder: (BuildContext context, int index) => ListTile(
-                  onTap: () => null,
+                      onTap: () => null,
                       leading: Container(
                         height: 50,
                         width: 50,
@@ -88,24 +94,27 @@ class PlayerUpNext extends StatelessWidget {
                       title: Text(
                         'Twentyone Pilots',
                         style: TextStyle(
-                            fontWeight: FontWeight.w500,
-                            color: Colors.grey,
-                            fontSize: AppFont.sm),
+                          fontWeight: FontWeight.w700,
+                          color: secondaryText,
+                          fontSize: AppFont.md - 3,
+                        ),
                       ),
                       subtitle: Text(
                         'Honour and Us',
                         style: TextStyle(
-                            fontWeight: FontWeight.w700,
-                            color: secondaryText,
-                            fontSize: AppFont.md - 3,
-                            height: 1.5),
+                          fontWeight: FontWeight.w500,
+                          fontSize: AppFont.sm,
+                          color: Colors.grey,
+                          height: 1.5,
+                        ),
                       ),
                       trailing: Text(
                         '03:37',
                         style: TextStyle(
-                            fontWeight: FontWeight.w600,
-                            color: Colors.grey,
-                            fontSize: AppFont.sm + 1),
+                          fontWeight: FontWeight.w600,
+                          color: Colors.grey,
+                          fontSize: AppFont.sm + 1,
+                        ),
                       ),
                       contentPadding: EdgeInsets.symmetric(horizontal: 0),
                     ),
