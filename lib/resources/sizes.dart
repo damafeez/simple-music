@@ -1,4 +1,5 @@
 class AppSpace {
+  static final xs = 10.0;
   static final sm = 20.0;
   static final md = 25.0;
   static final lg = 35.0;

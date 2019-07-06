@@ -39,18 +39,22 @@ class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
-      onWillPop: () => Future((){
-        if (panPercent == 1.0) {
-          return true;
-        } else {
-          closeMusicContainer.add('close');
-        }
-      }),
+      onWillPop: () => Future(() {
+            if (panPercent == 1.0) {
+              return true;
+            } else {
+              closeMusicContainer.add('close');
+            }
+          }),
       child: Stack(
         children: <Widget>[
           Scaffold(
-            body: Container(
-              color: Colors.red,
+            body: DecoratedBox(
+              decoration: BoxDecoration(
+                color: Colors.black.withOpacity(0.7 * (1 - panPercent)),
+              ),
+              position: DecorationPosition.foreground,
+              child: Container(),
             ),
           ),
           Transform.translate(

@@ -7,6 +7,7 @@ import 'package:simple_music_player/data/fixtures/lyrics.dart';
 import 'package:simple_music_player/resources/assets.dart';
 import 'package:simple_music_player/resources/colors.dart';
 import 'package:simple_music_player/resources/sizes.dart';
+import 'package:simple_music_player/widgets/player_bar.dart';
 import 'package:simple_music_player/widgets/player_controls.dart';
 import 'package:simple_music_player/widgets/player_lyrics.dart';
 import 'package:simple_music_player/widgets/player_timeline.dart';
@@ -150,7 +151,15 @@ class _PlayerContainerState extends State<PlayerContainer>
       onVerticalDragEnd: _onPanEnd,
       onTap: () => _animateContainer(true),
       child: Container(
-        color: Colors.transparent,
+        decoration: BoxDecoration(
+          color: Colors.transparent,
+          border: Border(
+            top: BorderSide(
+              color: secondaryText.withOpacity(0.3),
+              width: 1,
+            ),
+          ),
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
@@ -204,14 +213,27 @@ class _PlayerContainerState extends State<PlayerContainer>
             ),
             Transform.translate(
               offset: Offset(0, -110 * widget.panPercent),
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: AppSpace.sm),
-                child: LayoutBuilder(
-                  builder: (BuildContext context, BoxConstraints constraints) {
-                    final width = constraints.maxWidth;
-                    return Row(
-                      children: <Widget>[
-                        Container(
+              child: LayoutBuilder(
+                builder: (BuildContext context, BoxConstraints constraints) {
+                  final width = constraints.maxWidth;
+
+                  return Stack(
+                    children: <Widget>[
+                      Container(
+                        padding: EdgeInsets.only(
+                            left: AppSpace.sm + minAlbulmArtWidth),
+                        child: Transform.translate(
+                          offset: Offset(-50.0 * (1 - widget.panPercent),
+                              -100.0 * (1 - widget.panPercent)),
+                          child: Opacity(
+                            opacity: ((widget.panPercent * 3) - 2).clamp(0.0, 1.0),
+                            child: PlayerBar(),
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: AppSpace.sm),
+                        child: Container(
                           width: lerpDouble(
                               width, minAlbulmArtWidth, widget.panPercent),
                           child: AspectRatio(
@@ -234,13 +256,10 @@ class _PlayerContainerState extends State<PlayerContainer>
                             ),
                           ),
                         ),
-                        Expanded(
-                          child: Container(child: Text(' ')),
-                        ),
-                      ],
-                    );
-                  },
-                ),
+                      ),
+                    ],
+                  );
+                },
               ),
             ),
             Transform.translate(
