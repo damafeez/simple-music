@@ -19,7 +19,7 @@ class PlayerContainer extends StatefulWidget {
   final StreamController closeStreamController;
 
   PlayerContainer({
-    this.panPercent,
+    @required this.panPercent,
     @required this.panUpdateCallback,
     @required this.scaffoldScrollController,
     @required this.closeStreamController,
@@ -31,7 +31,6 @@ class PlayerContainer extends StatefulWidget {
 
 class _PlayerContainerState extends State<PlayerContainer>
     with SingleTickerProviderStateMixin {
-  final minAlbulmArtWidth = 50.0;
   final dragAutoCompletePercent = 0.35;
 
   double startDragY;
@@ -179,7 +178,7 @@ class _PlayerContainerState extends State<PlayerContainer>
                     ),
                     Padding(
                       padding: EdgeInsets.only(
-                          top: AppSpace.md + 20, bottom: AppSpace.md),
+                          top: AppSpace.md + 17, bottom: AppSpace.md),
                       child: RichText(
                         textAlign: TextAlign.center,
                         text: TextSpan(
@@ -221,7 +220,7 @@ class _PlayerContainerState extends State<PlayerContainer>
                     children: <Widget>[
                       Container(
                         padding: EdgeInsets.only(
-                            left: AppSpace.sm + minAlbulmArtWidth),
+                            left: AppSpace.sm + collapsedAlbumArtWidth),
                         child: Transform.translate(
                           offset: Offset(-50.0 * (1 - widget.panPercent),
                               -100.0 * (1 - widget.panPercent)),
@@ -236,7 +235,7 @@ class _PlayerContainerState extends State<PlayerContainer>
                         padding: EdgeInsets.symmetric(horizontal: AppSpace.sm),
                         child: Container(
                           width: lerpDouble(
-                              width, minAlbulmArtWidth, widget.panPercent),
+                              width, collapsedAlbumArtWidth, widget.panPercent),
                           child: AspectRatio(
                             aspectRatio: 1,
                             child: Container(

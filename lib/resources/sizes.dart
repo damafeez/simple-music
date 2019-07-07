@@ -12,3 +12,6 @@ class AppFont {
   static final lg = 28.0;
   static final xl = 35.0;
 }
+
+const collapsedAlbumArtWidth = 50.0;
+const collapsedAlbulmArtHorizontalPadding = 10.0;

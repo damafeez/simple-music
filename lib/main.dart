@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:simple_music_player/resources/colors.dart';
-import 'package:simple_music_player/screens/home.dart';
+import 'package:simple_music_player/widgets/navigation_logic.dart';
 
 void main() => runApp(Application());
 
@@ -11,7 +11,7 @@ class Application extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Simple Music',
       theme: _buildThemeData(),
-      home: Home(),
+      home: NavigationLogic(),
     );
   }
 }
