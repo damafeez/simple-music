@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:simple_music_player/data/fixtures/pages.dart';
+import 'package:simple_music_player/resources/colors.dart';
 import 'package:simple_music_player/widgets/player_container.dart';
 import 'package:simple_music_player/widgets/player_up_next.dart';
 
@@ -13,8 +15,8 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   final ScrollController scrollController = ScrollController();
   StreamController closeMusicContainer;
-  double panPercent = 0.0;
-
+  double panPercent = 1.0;
+  int bottomNavigationIndex = 1;
   _HomeState() : closeMusicContainer = StreamController();
 
   _onPlaylistTap() {
@@ -34,7 +36,21 @@ class _HomeState extends State<Home> {
     });
   }
 
-  _onPanEnd() {}
+  _buildBottomBarItems() {
+    List<BottomNavigationBarItem> bottomNavigationBarItems =
+        <BottomNavigationBarItem>[];
+
+    for (int i = 0; i < pages.length; i++) {
+      final Page page = pages[i];
+      bottomNavigationBarItems.add(BottomNavigationBarItem(
+          icon: page.icon,
+          title: Text(page.label,
+              style: i == bottomNavigationIndex
+                  ? TextStyle(fontWeight: FontWeight.w600)
+                  : null)));
+    }
+    return bottomNavigationBarItems;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -48,18 +64,19 @@ class _HomeState extends State<Home> {
           }),
       child: Stack(
         children: <Widget>[
-          Scaffold(
-            body: DecoratedBox(
-              decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.7 * (1 - panPercent)),
-              ),
-              position: DecorationPosition.foreground,
-              child: Container(),
+          DecoratedBox(
+            decoration: BoxDecoration(
+              color: Colors.black.withOpacity(0.7 * (1 - panPercent)),
+            ),
+            position: DecorationPosition.foreground,
+            child: Container(
+              padding: EdgeInsets.only(bottom: 120),
+              child: pages.elementAt(bottomNavigationIndex).widget,
             ),
           ),
           Transform.translate(
             offset: Offset(
-                0.0, ((MediaQuery.of(context).size.height - 100) * panPercent)),
+                0.0, ((MediaQuery.of(context).size.height - 120) * panPercent)),
             child: Scaffold(
               body: ListView(
                 physics: ClampingScrollPhysics(),
@@ -78,7 +95,30 @@ class _HomeState extends State<Home> {
                 ],
               ),
             ),
-          )
+          ),
+          Positioned(
+            left: 0.0,
+            right: 0.0,
+            bottom: 0.0,
+            child: Transform.translate(
+              offset: Offset(0.0, 100.0 * (1 - panPercent)),
+              child: Opacity(
+                opacity: ((panPercent * 2) - 1).clamp(0.0, 1.0),
+                child: BottomNavigationBar(
+                  unselectedItemColor: secondaryText,
+                  selectedItemColor: primaryText,
+                  showUnselectedLabels: true,
+                  selectedFontSize: 12,
+                  type: BottomNavigationBarType.fixed,
+                  currentIndex: bottomNavigationIndex,
+                  onTap: (int index) => setState(() {
+                        bottomNavigationIndex = index;
+                      }),
+                  items: _buildBottomBarItems(),
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );

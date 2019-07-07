@@ -226,7 +226,8 @@ class _PlayerContainerState extends State<PlayerContainer>
                           offset: Offset(-50.0 * (1 - widget.panPercent),
                               -100.0 * (1 - widget.panPercent)),
                           child: Opacity(
-                            opacity: ((widget.panPercent * 3) - 2).clamp(0.0, 1.0),
+                            opacity:
+                                ((widget.panPercent * 3) - 2).clamp(0.0, 1.0),
                             child: PlayerBar(),
                           ),
                         ),
