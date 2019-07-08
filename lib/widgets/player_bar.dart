@@ -32,10 +32,12 @@ class PlayerBar extends StatelessWidget {
         ),
         IconButton(
           icon: Icon(Icons.play_arrow),
+          iconSize: AppFont.lg,
           onPressed: () {},
         ),
         IconButton(
           icon: Icon(Icons.skip_next),
+          iconSize: AppFont.lg,
           onPressed: () {},
         ),
       ],
