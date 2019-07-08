@@ -7,14 +7,16 @@ class SongRow extends StatelessWidget {
   final String title;
   final String artist;
   final int number;
+  final bool isActive;
   const SongRow(
-      {Key key, @required this.title, this.artist, @required this.number})
+      {Key key, @required this.title, this.artist, @required this.number, this.isActive = false})
       : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Container(
       height: 60,
+      color: isActive ? secondary : Colors.transparent,
       padding: EdgeInsets.only(left: AppSpace.sm),
       child: Center(
         child: Row(

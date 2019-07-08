@@ -1,8 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:simple_music_player/resources/colors.dart';
 import 'package:simple_music_player/widgets/navigation_logic.dart';
+import 'package:provider/provider.dart';
 
-void main() => runApp(Application());
+import 'data/store/app_state.dart';
+
+void main() => runApp(
+    ChangeNotifierProvider<AppState>(
+      builder: (context) => AppState()..refresh(),
+      child: Application(),
+    )
+  );
 
 class Application extends StatelessWidget {
   @override

@@ -23,7 +23,6 @@ class Player extends StatelessWidget {
       curve: Curves.easeInOut,
     );
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
