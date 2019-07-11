@@ -82,8 +82,8 @@ class Tracks extends StatelessWidget {
         physics: BouncingScrollPhysics(),
         itemBuilder: (BuildContext context, int index) => InkWell(
               onTap: () {
-                if (model.playerState == PlayerState.playing && model.currentSongIndex == index) {
-                  return model.pause();
+                if (model.currentSongIndex == index) {
+                  return model.playerState == PlayerState.playing ? model.pause() : model.play(index); 
                 }
                 if (model.playerState != PlayerState.stopped) model.stop();
                 model.play(index);
@@ -93,6 +93,7 @@ class Tracks extends StatelessWidget {
                 number: index + 1,
                 artist: model.songs[index].artist,
                 isActive: model.currentSongIndex == index,
+                isPlaying: model.playerState == PlayerState.playing,
               ),
             ),
       );

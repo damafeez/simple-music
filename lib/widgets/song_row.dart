@@ -8,14 +8,15 @@ class SongRow extends StatelessWidget {
   final String artist;
   final int number;
   final bool isActive;
+  final bool isPlaying;
   const SongRow(
-      {Key key, @required this.title, this.artist, @required this.number, this.isActive = false})
+      {Key key, @required this.title, this.artist, @required this.number, this.isActive = false, this.isPlaying = false})
       : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 60,
+      height: 70,
       color: isActive ? secondary : Colors.transparent,
       padding: EdgeInsets.only(left: AppSpace.sm),
       child: Center(
@@ -23,10 +24,13 @@ class SongRow extends StatelessWidget {
           children: <Widget>[
             SizedBox(
               width: AppSpace.lg,
-              child: Text(
-                '$number',
-                style:
-                    TextStyle(fontSize: AppFont.sm + 2, color: secondaryText),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                              child: isActive && isPlaying ? Icon(Icons.pause, size: AppFont.md + 2,) : Text(
+                  '$number',
+                  style:
+                      TextStyle(fontSize: AppFont.sm + 2, color: secondaryText),
+                ),
               ),
             ),
             Expanded(

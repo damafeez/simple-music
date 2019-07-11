@@ -8,7 +8,7 @@ enum PlayerState { stopped, playing, paused }
 class AppState extends ChangeNotifier {
   List<Song> _songs;
   bool _songsLoading = false;
-  int currentSongIndex = -1;
+  int currentSongIndex = 0;
   MusicFinder _audioPlayer = MusicFinder();
   PlayerState playerState = PlayerState.stopped;
 

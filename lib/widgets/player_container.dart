@@ -1,9 +1,12 @@
 import 'dart:async';
 import 'dart:ui';
+import 'dart:io';
 
+import 'package:flute_music_player/flute_music_player.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:simple_music_player/data/fixtures/lyrics.dart';
+import 'package:simple_music_player/data/store/app_state.dart';
 import 'package:simple_music_player/resources/assets.dart';
 import 'package:simple_music_player/resources/colors.dart';
 import 'package:simple_music_player/resources/sizes.dart';
@@ -17,12 +20,14 @@ class PlayerContainer extends StatefulWidget {
   final Function(double) panUpdateCallback;
   final ScrollController scaffoldScrollController;
   final StreamController closeStreamController;
+  final AppState model;
 
   PlayerContainer({
     @required this.panPercent,
     @required this.panUpdateCallback,
     @required this.scaffoldScrollController,
     @required this.closeStreamController,
+    @required this.model,
   });
 
   @override
@@ -46,7 +51,7 @@ class _PlayerContainerState extends State<PlayerContainer>
   @override
   void initState() {
     dragAutoCompleteAnimationController =
-        AnimationController(duration: Duration(milliseconds: 220), vsync: this)
+        AnimationController(duration: Duration(milliseconds: 400), vsync: this)
           ..addListener(() {
             widget.panUpdateCallback(
                 dragAutoCompleteAnimationTween.evaluate(curvedAnimation));
@@ -72,17 +77,20 @@ class _PlayerContainerState extends State<PlayerContainer>
     super.dispose();
   }
 
+  bool _gestureDisabled() {
+    return (widget.scaffoldScrollController.offset !=
+        widget.scaffoldScrollController.position.minScrollExtent) ||
+        widget.model.currentSongIndex < 0;
+  }
   void _onPanStart(DragStartDetails details) {
-    if (widget.scaffoldScrollController.offset !=
-        widget.scaffoldScrollController.position.minScrollExtent) return;
+    if (_gestureDisabled()) return;
 
     startDragY = details.globalPosition.dy;
     startDragPercent = widget.panPercent;
   }
 
   void _onPanUpdate(DragUpdateDetails details) {
-    if (widget.scaffoldScrollController.offset !=
-        widget.scaffoldScrollController.position.minScrollExtent) return;
+    if (_gestureDisabled()) return;    
 
     if (startDragY != null) {
       dragDistance = details.globalPosition.dy - startDragY;
@@ -104,8 +112,7 @@ class _PlayerContainerState extends State<PlayerContainer>
   }
 
   void _onPanEnd(DragEndDetails dragEndDetails) {
-    if (widget.scaffoldScrollController.offset !=
-        widget.scaffoldScrollController.position.minScrollExtent) return;
+    if (_gestureDisabled()) return;    
 
     if (dragDirection == DragDirection.down) {
       _animateContainer(
@@ -135,8 +142,8 @@ class _PlayerContainerState extends State<PlayerContainer>
     // calculate duraction based on distance to end
     final distanceToEnd = (widget.panPercent - (open ? 0.0 : 1.0)).abs();
     dragAutoCompleteAnimationController.duration =
-        Duration(milliseconds: (250 * distanceToEnd).clamp(100, 250).round());
-
+        Duration(milliseconds: (400 * distanceToEnd).clamp(200, 400).round());
+    print('${dragAutoCompleteAnimationController.duration}=====');
     dragAutoCompleteAnimationTween =
         Tween(begin: widget.panPercent, end: open ? 0.0 : 1.0);
     dragAutoCompleteAnimationController.forward(from: 0.0);
@@ -144,6 +151,13 @@ class _PlayerContainerState extends State<PlayerContainer>
 
   @override
   Widget build(BuildContext context) {
+    if(widget.model.songsLoading) return Container();
+    final int currentSongIndex = widget.model.currentSongIndex;
+    final Song song = widget.model.songs[currentSongIndex];
+
+    final albumImageFile =
+        song.albumArt == null ? null : File.fromUri(Uri.parse(song.albumArt));
+
     return GestureDetector(
       onVerticalDragStart: _onPanStart,
       onVerticalDragUpdate: _onPanUpdate,
@@ -189,9 +203,9 @@ class _PlayerContainerState extends State<PlayerContainer>
                               fontSize: AppFont.md,
                             ),
                             children: <TextSpan>[
-                              TextSpan(text: 'Cheap Thrills\n'),
+                              TextSpan(text: '${song.title}\n'),
                               TextSpan(
-                                  text: 'Sia',
+                                  text: song.artist,
                                   style: TextStyle(
                                       color: secondaryText,
                                       fontSize: AppFont.md - 3,
@@ -227,7 +241,7 @@ class _PlayerContainerState extends State<PlayerContainer>
                           child: Opacity(
                             opacity:
                                 ((widget.panPercent * 3) - 2).clamp(0.0, 1.0),
-                            child: PlayerBar(),
+                            child: PlayerBar(title: song.title, artist: song.artist),
                           ),
                         ),
                       ),
@@ -241,9 +255,10 @@ class _PlayerContainerState extends State<PlayerContainer>
                             child: Container(
                               decoration: BoxDecoration(
                                 image: DecorationImage(
-                                  image: ExactAssetImage(SIA),
-                                  fit: BoxFit.cover,
-                                ),
+                                        image: albumImageFile != null ?
+                                        FileImage(albumImageFile) : ExactAssetImage(SIA),
+                                        fit: BoxFit.cover,
+                                      ),
                                 borderRadius: BorderRadius.circular(5.0),
                                 boxShadow: [
                                   BoxShadow(

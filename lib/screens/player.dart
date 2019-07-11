@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:simple_music_player/data/store/app_state.dart';
 import 'package:simple_music_player/widgets/player_container.dart';
 import 'package:simple_music_player/widgets/player_up_next.dart';
 
@@ -23,25 +25,31 @@ class Player extends StatelessWidget {
       curve: Curves.easeInOut,
     );
   }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: ListView(
-        physics: ClampingScrollPhysics(),
-        controller: scrollController,
-        padding: EdgeInsets.all(0.0),
-        children: <Widget>[
-          PlayerContainer(
-            panPercent: panPercent,
-            panUpdateCallback: onPanUpdate,
-            scaffoldScrollController: scrollController,
-            closeStreamController: closeMusicContainer,
+    return Consumer<AppState>(
+      builder: (context, model, child) {
+        return Scaffold(
+          body: ListView(
+            physics: ClampingScrollPhysics(),
+            controller: scrollController,
+            padding: EdgeInsets.all(0.0),
+            children: <Widget>[
+              PlayerContainer(
+                panPercent: panPercent,
+                panUpdateCallback: onPanUpdate,
+                scaffoldScrollController: scrollController,
+                closeStreamController: closeMusicContainer,
+                model: model,
+              ),
+              PlayerUpNext(
+                onPlaylistTap: _onPlaylistTap,
+              ),
+            ],
           ),
-          PlayerUpNext(
-            onPlaylistTap: _onPlaylistTap,
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 }

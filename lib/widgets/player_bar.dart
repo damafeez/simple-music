@@ -3,6 +3,10 @@ import 'package:simple_music_player/resources/colors.dart';
 import 'package:simple_music_player/resources/sizes.dart';
 
 class PlayerBar extends StatelessWidget {
+  final String title;
+  final String artist;
+
+  const PlayerBar({Key key, this.title, this.artist}) : super(key: key);
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -19,9 +23,9 @@ class PlayerBar extends StatelessWidget {
                     fontSize: AppFont.md - 3,
                   ),
                   children: <TextSpan>[
-                    TextSpan(text: 'Cheap Thrills\n'),
+                    TextSpan(text: '${title}\n'),
                     TextSpan(
-                        text: 'Sia',
+                        text: '$artist',
                         style: TextStyle(
                             color: secondaryText,
                             fontSize: AppFont.sm,
