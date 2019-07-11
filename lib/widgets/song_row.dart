@@ -1,7 +1,7 @@
-
 import 'package:flutter/material.dart';
 import 'package:simple_music_player/resources/colors.dart';
 import 'package:simple_music_player/resources/sizes.dart';
+import 'package:simple_music_player/resources/utils.dart';
 
 class SongRow extends StatelessWidget {
   final String title;
@@ -15,9 +15,11 @@ class SongRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 70,
-      color: isActive ? secondary : Colors.transparent,
+    return AnimatedContainer(
+      duration: Duration(milliseconds: 250),
+      curve: Curves.easeInOut,
+      height: 75,
+      color: secondary.withOpacity(isActive ? 1 : 0),
       padding: EdgeInsets.only(left: AppSpace.sm),
       child: Center(
         child: Row(
@@ -39,13 +41,13 @@ class SongRow extends StatelessWidget {
                     text: '',
                     style: TextStyle(
                       color: accentText,
-                      fontWeight: FontWeight.w700,
+                      fontWeight: FontWeight.w600,
                       fontSize: AppFont.md - 2,
                     ),
                     children: <TextSpan>[
-                      TextSpan(text: '$title\n'),
+                      TextSpan(text: '${Utils.truncate(title, 28)}\n'),
                       TextSpan(
-                          text: '$artist',
+                          text: '${Utils.truncate(artist, 40)}',
                           style: TextStyle(
                               color: secondaryText,
                               fontSize: AppFont.sm,

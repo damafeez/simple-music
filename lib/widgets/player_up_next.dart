@@ -67,6 +67,7 @@ class PlayerUpNext extends StatelessWidget {
             Expanded(
               child: ListView.builder(
                 itemCount: 15,
+                key: PageStorageKey<String>('Up Next'),
                 physics: BouncingScrollPhysics(),
                 padding: EdgeInsets.symmetric(
                   horizontal: AppSpace.sm,

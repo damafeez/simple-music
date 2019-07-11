@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:simple_music_player/data/store/app_state.dart';
+import 'package:simple_music_player/data/store/music_engine.dart';
 import 'package:simple_music_player/resources/colors.dart';
 import 'package:simple_music_player/resources/sizes.dart';
 import 'package:simple_music_player/widgets/song_row.dart';
@@ -74,28 +74,31 @@ class _SongsState extends State<Songs> with TickerProviderStateMixin {
 class Tracks extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Consumer<AppState>(builder: (context, model, child) {
-      if (model.songsLoading && model.songs == null)
+    return Consumer<MusicEngine>(builder: (context, musicEngine, child) {
+      if (musicEngine.songsLoading && musicEngine.songs == null)
         return CircularProgressIndicator();
-      return ListView.builder(
-        itemCount: model.songs.length,
-        physics: BouncingScrollPhysics(),
-        itemBuilder: (BuildContext context, int index) => InkWell(
-              onTap: () {
-                if (model.currentSongIndex == index) {
-                  return model.playerState == PlayerState.playing ? model.pause() : model.play(index); 
-                }
-                if (model.playerState != PlayerState.stopped) model.stop();
-                model.play(index);
-              },
-              child: SongRow(
-                title: model.songs[index].title,
-                number: index + 1,
-                artist: model.songs[index].artist,
-                isActive: model.currentSongIndex == index,
-                isPlaying: model.playerState == PlayerState.playing,
-              ),
-            ),
+      return Scrollbar(
+        child: SafeArea(
+          top: false,
+          bottom: false,
+          child: ListView.builder(
+            key: PageStorageKey<String>('Tracks'),
+            itemCount: musicEngine.songs.length,
+            physics: BouncingScrollPhysics(),
+            itemBuilder: (BuildContext context, int index) => InkWell(
+                  onTap: () {
+                    musicEngine.play(index);
+                  },
+                  child: SongRow(
+                    title: musicEngine.songs[index].title,
+                    number: index + 1,
+                    artist: musicEngine.songs[index].artist,
+                    isActive: musicEngine.currentSongIndex == index,
+                    isPlaying: musicEngine.playerState == PlayerState.playing,
+                  ),
+                ),
+          ),
+        ),
       );
     });
   }
@@ -104,37 +107,42 @@ class Tracks extends StatelessWidget {
 class Playlists extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-      itemCount: 1,
-      physics: BouncingScrollPhysics(),
-      itemBuilder: (BuildContext context, int index) => InkWell(
-            onTap: () {},
-            child: Container(
-              height: 60,
-              padding: EdgeInsets.symmetric(horizontal: AppSpace.md),
-              child: Row(
-                children: <Widget>[
-                  CircleAvatar(
-                    backgroundColor: Colors.grey,
-                    child: Icon(
-                      Icons.playlist_add,
-                      color: Colors.white,
+    return SafeArea(
+      top: false,
+      bottom: false,
+      child: ListView.builder(
+        key: PageStorageKey<String>('Playlist'),
+        itemCount: 1,
+        physics: BouncingScrollPhysics(),
+        itemBuilder: (BuildContext context, int index) => InkWell(
+              onTap: () {},
+              child: Container(
+                height: 60,
+                padding: EdgeInsets.symmetric(horizontal: AppSpace.md),
+                child: Row(
+                  children: <Widget>[
+                    CircleAvatar(
+                      backgroundColor: Colors.grey,
+                      child: Icon(
+                        Icons.playlist_add,
+                        color: Colors.white,
+                      ),
                     ),
-                  ),
-                  SizedBox(
-                    width: AppSpace.sm,
-                  ),
-                  Text(
-                    'New Playlist',
-                    style: TextStyle(
-                        color: Colors.grey,
-                        fontStyle: FontStyle.italic,
-                        fontWeight: FontWeight.w600),
-                  )
-                ],
+                    SizedBox(
+                      width: AppSpace.sm,
+                    ),
+                    Text(
+                      'New Playlist',
+                      style: TextStyle(
+                          color: Colors.grey,
+                          fontStyle: FontStyle.italic,
+                          fontWeight: FontWeight.w600),
+                    )
+                  ],
+                ),
               ),
             ),
-          ),
+      ),
     );
   }
 }

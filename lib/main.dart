@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:simple_music_player/data/store/music_engine.dart';
 import 'package:simple_music_player/resources/colors.dart';
 import 'package:simple_music_player/widgets/navigation_logic.dart';
 import 'package:provider/provider.dart';
 
-import 'data/store/app_state.dart';
-
-void main() => runApp(
-    ChangeNotifierProvider<AppState>(
-      builder: (context) => AppState()..refresh(),
+void main() => runApp(MultiProvider(
+      providers: [
+        ChangeNotifierProvider<MusicEngine>(
+          builder: (context) => MusicEngine()..refresh(),
+        ),
+      ],
       child: Application(),
-    )
-  );
+    ));
 
 class Application extends StatelessWidget {
   @override
@@ -24,7 +25,7 @@ class Application extends StatelessWidget {
   }
 }
 
-ThemeData _buildThemeData () {
+ThemeData _buildThemeData() {
   final ThemeData base = ThemeData.light();
 
   return base.copyWith(

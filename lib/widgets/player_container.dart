@@ -6,29 +6,21 @@ import 'package:flute_music_player/flute_music_player.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:simple_music_player/data/fixtures/lyrics.dart';
-import 'package:simple_music_player/data/store/app_state.dart';
+import 'package:simple_music_player/data/store/music_engine.dart';
 import 'package:simple_music_player/resources/assets.dart';
 import 'package:simple_music_player/resources/colors.dart';
 import 'package:simple_music_player/resources/sizes.dart';
+import 'package:simple_music_player/resources/utils.dart';
+import 'package:simple_music_player/widgets/navigation_logic.dart';
 import 'package:simple_music_player/widgets/player_bar.dart';
 import 'package:simple_music_player/widgets/player_controls.dart';
 import 'package:simple_music_player/widgets/player_lyrics.dart';
 import 'package:simple_music_player/widgets/player_timeline.dart';
 
 class PlayerContainer extends StatefulWidget {
-  final double panPercent;
-  final Function(double) panUpdateCallback;
-  final ScrollController scaffoldScrollController;
-  final StreamController closeStreamController;
-  final AppState model;
+  final PlayerContainerViewModel viewModel;
 
-  PlayerContainer({
-    @required this.panPercent,
-    @required this.panUpdateCallback,
-    @required this.scaffoldScrollController,
-    @required this.closeStreamController,
-    @required this.model,
-  });
+  PlayerContainer(this.viewModel);
 
   @override
   _PlayerContainerState createState() => _PlayerContainerState();
@@ -38,11 +30,13 @@ class _PlayerContainerState extends State<PlayerContainer>
     with SingleTickerProviderStateMixin {
   final dragAutoCompletePercent = 0.35;
 
+  DragDirection dragDirection = DragDirection.none;
+  Color albumArtShadowColor = Color.fromRGBO(70, 70, 70, 0.4);
+
   double startDragY;
   double startDragPercent;
   double dragDistance;
   double dragPercent;
-  DragDirection dragDirection = DragDirection.none;
 
   Tween<double> dragAutoCompleteAnimationTween;
   AnimationController dragAutoCompleteAnimationController;
@@ -53,7 +47,7 @@ class _PlayerContainerState extends State<PlayerContainer>
     dragAutoCompleteAnimationController =
         AnimationController(duration: Duration(milliseconds: 400), vsync: this)
           ..addListener(() {
-            widget.panUpdateCallback(
+            widget.viewModel.panUpdateCallback(
                 dragAutoCompleteAnimationTween.evaluate(curvedAnimation));
           })
           ..addStatusListener((AnimationStatus status) {
@@ -66,31 +60,39 @@ class _PlayerContainerState extends State<PlayerContainer>
     curvedAnimation = CurvedAnimation(
         parent: dragAutoCompleteAnimationController, curve: Curves.easeOut);
 
-    widget.closeStreamController.stream.listen((data) {
-      _animateContainer(false);
+    widget.viewModel.navigationLogicEvents.stream.listen((event) {
+      switch (event) {
+        case NavigationLogicEvents.collapsePlayer:
+          _animateContainer(open: false);
+          break;
+        default:
+      }
     });
   }
 
   @override
   void dispose() {
     dragAutoCompleteAnimationController.dispose();
+    widget.viewModel.musicEngine.stop();
     super.dispose();
   }
 
   bool _gestureDisabled() {
-    return (widget.scaffoldScrollController.offset !=
-        widget.scaffoldScrollController.position.minScrollExtent) ||
-        widget.model.currentSongIndex < 0;
+    return (widget.viewModel.scaffoldScrollController.offset !=
+            widget
+                .viewModel.scaffoldScrollController.position.minScrollExtent) ||
+        widget.viewModel.musicEngine.currentSongIndex < 0;
   }
+
   void _onPanStart(DragStartDetails details) {
     if (_gestureDisabled()) return;
 
     startDragY = details.globalPosition.dy;
-    startDragPercent = widget.panPercent;
+    startDragPercent = widget.viewModel.panPercent;
   }
 
   void _onPanUpdate(DragUpdateDetails details) {
-    if (_gestureDisabled()) return;    
+    if (_gestureDisabled()) return;
 
     if (startDragY != null) {
       dragDistance = details.globalPosition.dy - startDragY;
@@ -107,62 +109,57 @@ class _PlayerContainerState extends State<PlayerContainer>
       dragPercent = dragDistance / fullDragHeight;
       final double total = (startDragPercent + dragPercent).clamp(0.0, 1.0);
 
-      widget.panUpdateCallback(total);
+      widget.viewModel.panUpdateCallback(total);
     }
   }
 
   void _onPanEnd(DragEndDetails dragEndDetails) {
-    if (_gestureDisabled()) return;    
+    if (_gestureDisabled()) return;
 
     if (dragDirection == DragDirection.down) {
       _animateContainer(
-          dragPercent.abs() >= dragAutoCompletePercent ? false : true);
+          open: dragPercent.abs() >= dragAutoCompletePercent ? false : true);
     } else if (dragDirection == DragDirection.up) {
       _animateContainer(
-          dragPercent.abs() >= dragAutoCompletePercent ? true : false);
+          open: dragPercent.abs() >= dragAutoCompletePercent ? true : false);
     }
     startDragY = null;
     startDragPercent = null;
   }
 
-  void _animateContainer(open) {
-    if ((open && widget.panPercent == 0.0) ||
-        (!open && widget.panPercent == 1.0)) return;
+  void _animateContainer({open = true}) {
+    if ((open && widget.viewModel.panPercent == 0.0) ||
+        (!open && widget.viewModel.panPercent == 1.0)) return;
 
     final double scrollTop =
-        widget.scaffoldScrollController.position.minScrollExtent;
+        widget.viewModel.scaffoldScrollController.position.minScrollExtent;
 
-    if (widget.scaffoldScrollController.offset != scrollTop) {
-      widget.scaffoldScrollController.animateTo(
+    if (widget.viewModel.scaffoldScrollController.offset != scrollTop) {
+      widget.viewModel.scaffoldScrollController.animateTo(
         scrollTop,
         duration: Duration(milliseconds: 100),
         curve: Curves.easeInOut,
       );
     }
     // calculate duraction based on distance to end
-    final distanceToEnd = (widget.panPercent - (open ? 0.0 : 1.0)).abs();
+    final distanceToEnd =
+        (widget.viewModel.panPercent - (open ? 0.0 : 1.0)).abs();
     dragAutoCompleteAnimationController.duration =
         Duration(milliseconds: (400 * distanceToEnd).clamp(200, 400).round());
-    print('${dragAutoCompleteAnimationController.duration}=====');
     dragAutoCompleteAnimationTween =
-        Tween(begin: widget.panPercent, end: open ? 0.0 : 1.0);
+        Tween(begin: widget.viewModel.panPercent, end: open ? 0.0 : 1.0);
     dragAutoCompleteAnimationController.forward(from: 0.0);
   }
 
   @override
   Widget build(BuildContext context) {
-    if(widget.model.songsLoading) return Container();
-    final int currentSongIndex = widget.model.currentSongIndex;
-    final Song song = widget.model.songs[currentSongIndex];
-
-    final albumImageFile =
-        song.albumArt == null ? null : File.fromUri(Uri.parse(song.albumArt));
-
+    final int currentSongIndex = widget.viewModel.musicEngine.currentSongIndex;
+    final Song song = widget.viewModel.musicEngine.songs[currentSongIndex];
     return GestureDetector(
       onVerticalDragStart: _onPanStart,
       onVerticalDragUpdate: _onPanUpdate,
       onVerticalDragEnd: _onPanEnd,
-      onTap: () => _animateContainer(true),
+      onTap: () => _animateContainer(),
       child: Container(
         decoration: BoxDecoration(
           color: Colors.transparent,
@@ -177,9 +174,9 @@ class _PlayerContainerState extends State<PlayerContainer>
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Transform.translate(
-              offset: Offset(0, 250.0 * widget.panPercent),
+              offset: Offset(0, 250.0 * widget.viewModel.panPercent),
               child: Opacity(
-                opacity: (1 - 2 * widget.panPercent).clamp(0.0, 1.0),
+                opacity: (1 - 2 * widget.viewModel.panPercent).clamp(0.0, 1.0),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
@@ -188,7 +185,7 @@ class _PlayerContainerState extends State<PlayerContainer>
                         Icons.arrow_back,
                         color: primary,
                       ),
-                      onPressed: () => _animateContainer(false),
+                      onPressed: () => _animateContainer(open: false),
                     ),
                     Padding(
                       padding: EdgeInsets.only(
@@ -203,9 +200,10 @@ class _PlayerContainerState extends State<PlayerContainer>
                               fontSize: AppFont.md,
                             ),
                             children: <TextSpan>[
-                              TextSpan(text: '${song.title}\n'),
                               TextSpan(
-                                  text: song.artist,
+                                  text: '${Utils.truncate(song.title, 25)}\n'),
+                              TextSpan(
+                                  text: '${Utils.truncate(song.artist, 28)}',
                                   style: TextStyle(
                                       color: secondaryText,
                                       fontSize: AppFont.md - 3,
@@ -225,46 +223,51 @@ class _PlayerContainerState extends State<PlayerContainer>
               ),
             ),
             Transform.translate(
-              offset: Offset(0, -110 * widget.panPercent),
+              offset: Offset(0, -110 * widget.viewModel.panPercent),
               child: LayoutBuilder(
                 builder: (BuildContext context, BoxConstraints constraints) {
                   final width = constraints.maxWidth;
-
                   return Stack(
                     children: <Widget>[
                       Container(
                         padding: EdgeInsets.only(
                             left: AppSpace.sm + collapsedAlbumArtWidth),
                         child: Transform.translate(
-                          offset: Offset(-50.0 * (1 - widget.panPercent),
-                              -100.0 * (1 - widget.panPercent)),
+                          offset: Offset(
+                              -50.0 * (1 - widget.viewModel.panPercent),
+                              -100.0 * (1 - widget.viewModel.panPercent)),
                           child: Opacity(
-                            opacity:
-                                ((widget.panPercent * 3) - 2).clamp(0.0, 1.0),
-                            child: PlayerBar(title: song.title, artist: song.artist),
+                            opacity: ((widget.viewModel.panPercent * 3) - 2)
+                                .clamp(0.0, 1.0),
+                            child: PlayerBar(
+                                title: song.title,
+                                artist: song.artist,
+                                musicEngine: widget.viewModel.musicEngine),
                           ),
                         ),
                       ),
                       Padding(
                         padding: EdgeInsets.symmetric(horizontal: AppSpace.sm),
                         child: Container(
-                          width: lerpDouble(
-                              width, collapsedAlbumArtWidth, widget.panPercent),
+                          width: lerpDouble(width, collapsedAlbumArtWidth,
+                              widget.viewModel.panPercent),
                           child: AspectRatio(
                             aspectRatio: 1,
                             child: Container(
                               decoration: BoxDecoration(
                                 image: DecorationImage(
-                                        image: albumImageFile != null ?
-                                        FileImage(albumImageFile) : ExactAssetImage(SIA),
-                                        fit: BoxFit.cover,
-                                      ),
+                                  image: song.albumArt != null
+                                      ? FileImage(File.fromUri(
+                                          Uri.parse(song.albumArt)))
+                                      : ExactAssetImage(ALBUM_PLACEHOLDER),
+                                  fit: BoxFit.cover,
+                                ),
                                 borderRadius: BorderRadius.circular(5.0),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Color.fromRGBO(50, 50, 50, 0.4),
-                                    blurRadius: 25,
-                                    offset: Offset(7.0, 12.0),
+                                    color: albumArtShadowColor,
+                                    blurRadius: (30 * (1 - widget.viewModel.panPercent)),
+                                    offset: Offset(0.0, 10.0 * (1 - widget.viewModel.panPercent)),
                                   )
                                 ],
                               ),
@@ -278,7 +281,7 @@ class _PlayerContainerState extends State<PlayerContainer>
               ),
             ),
             Transform.translate(
-              offset: Offset(0, 200 * widget.panPercent),
+              offset: Offset(0, 200 * widget.viewModel.panPercent),
               child: Padding(
                 padding: EdgeInsets.only(
                   left: AppSpace.sm,
@@ -289,7 +292,7 @@ class _PlayerContainerState extends State<PlayerContainer>
                   children: <Widget>[
                     PlayerLyrics(lyrics: siaLyrics),
                     PlayerTimeline(),
-                    PlayerControls(),
+                    PlayerControls(musicEngine: widget.viewModel.musicEngine),
                   ],
                 ),
               ),
@@ -299,6 +302,22 @@ class _PlayerContainerState extends State<PlayerContainer>
       ),
     );
   }
+}
+
+class PlayerContainerViewModel {
+  final double panPercent;
+  final Function(double) panUpdateCallback;
+  final ScrollController scaffoldScrollController;
+  final StreamController<NavigationLogicEvents> navigationLogicEvents;
+  final MusicEngine musicEngine;
+
+  PlayerContainerViewModel({
+    @required this.panPercent,
+    @required this.panUpdateCallback,
+    @required this.scaffoldScrollController,
+    @required this.navigationLogicEvents,
+    @required this.musicEngine,
+  });
 }
 
 enum DragDirection {
