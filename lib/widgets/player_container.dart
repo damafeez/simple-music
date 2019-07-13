@@ -80,8 +80,7 @@ class _PlayerContainerState extends State<PlayerContainer>
   bool _gestureDisabled() {
     return (widget.viewModel.scaffoldScrollController.offset !=
             widget
-                .viewModel.scaffoldScrollController.position.minScrollExtent) ||
-        widget.viewModel.musicEngine.currentSongIndex < 0;
+                .viewModel.scaffoldScrollController.position.minScrollExtent);
   }
 
   void _onPanStart(DragStartDetails details) {
@@ -156,9 +155,12 @@ class _PlayerContainerState extends State<PlayerContainer>
     final int currentSongIndex = widget.viewModel.musicEngine.currentSongIndex;
     final Song song = widget.viewModel.musicEngine.songs[currentSongIndex];
     return GestureDetector(
-      onVerticalDragStart: _onPanStart,
-      onVerticalDragUpdate: _onPanUpdate,
-      onVerticalDragEnd: _onPanEnd,
+      // onVerticalDragStart: _onPanStart,
+      // onVerticalDragUpdate: _onPanUpdate,
+      // onVerticalDragEnd: _onPanEnd,
+      onVerticalDragStart: null,
+      onVerticalDragUpdate: null,
+      onVerticalDragEnd: null,
       onTap: () => _animateContainer(),
       child: Container(
         decoration: BoxDecoration(
