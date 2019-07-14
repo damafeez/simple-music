@@ -7,19 +7,41 @@ enum PlayerState { stopped, playing, paused }
 
 class MusicEngine extends ChangeNotifier {
   final MusicFinder _audioPlayer;
-  List<Song> _songs;
   bool _songsLoading = false;
+  ReplayMode _replayMode = ReplayMode.none;
+  List<Song> _songs;
   int currentSongIndex = -1;
   PlayerState playerState = PlayerState.stopped;
 
-  MusicEngine() : _audioPlayer = MusicFinder();
+  MusicEngine() : _audioPlayer = MusicFinder() {
+    _audioPlayer.setCompletionHandler(onComplete);
+  }
 
   MusicFinder get audioPlayer => _audioPlayer;
   int get length => _songs.length;
   bool get songsLoading => _songsLoading;
+  ReplayMode get replayMode => _replayMode;
+  List<Song> get songs => _songs;
 
-  List<Song> get songs {
-    return _songs;
+  void setReplayMode(ReplayMode mode) {
+    _replayMode = mode;
+
+    notifyListeners();
+  }
+
+  Future onComplete() {
+    switch (replayMode) {
+      case ReplayMode.none:
+        return playNextSong();
+      case ReplayMode.one:
+        return playSong(currentSongIndex);
+      case ReplayMode.all:
+        if (currentSongIndex == length - 1) {
+          return playSong(0);
+        }
+        return playNextSong();
+      default:
+    }
   }
 
   Future playNextSong() {
@@ -90,4 +112,17 @@ class MusicEngine extends ChangeNotifier {
 
     notifyListeners();
   }
+}
+
+enum ReplayMode {
+  none,
+  one,
+  all,
+}
+
+class SongsCollection {
+  final List<Song> songs;
+  final String image;
+
+  SongsCollection(this.songs, this.image);
 }

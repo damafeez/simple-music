@@ -23,7 +23,7 @@ class PlayerControls extends StatelessWidget {
             icon: Icon(
               Icons.favorite,
               size: 22,
-              color: secondaryText,
+              color: secondaryText.withOpacity(0.5),
             ),
             onPressed: () => null,
           ),
@@ -52,11 +52,19 @@ class PlayerControls extends StatelessWidget {
           ),
           IconButton(
             icon: Icon(
-              Icons.shuffle,
+              musicEngine.replayMode == ReplayMode.one ? Icons.repeat_one : Icons.repeat,
               size: 22.0,
-              color: secondaryText,
+              color:
+                  musicEngine.replayMode == ReplayMode.none ? secondaryText.withOpacity(0.5) : null,
             ),
-            onPressed: () => null,
+            onPressed: () {
+              final values = ReplayMode.values;
+              int currentIndex = values.indexOf(musicEngine.replayMode);
+              final ReplayMode nextMode = currentIndex == values.length - 1
+                  ? values[0]
+                  : values[currentIndex + 1];
+              musicEngine.setReplayMode(nextMode);
+            },
           ),
         ],
       ),
