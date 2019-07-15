@@ -155,12 +155,9 @@ class _PlayerContainerState extends State<PlayerContainer>
     final int currentSongIndex = widget.viewModel.musicEngine.currentSongIndex;
     final Song song = widget.viewModel.musicEngine.songs[currentSongIndex];
     return GestureDetector(
-      // onVerticalDragStart: _onPanStart,
-      // onVerticalDragUpdate: _onPanUpdate,
-      // onVerticalDragEnd: _onPanEnd,
-      onVerticalDragStart: null,
-      onVerticalDragUpdate: null,
-      onVerticalDragEnd: null,
+      onVerticalDragStart: _onPanStart,
+      onVerticalDragUpdate: _onPanUpdate,
+      onVerticalDragEnd: _onPanEnd,
       onTap: () => _animateContainer(),
       child: Container(
         decoration: BoxDecoration(
@@ -203,9 +200,9 @@ class _PlayerContainerState extends State<PlayerContainer>
                             ),
                             children: <TextSpan>[
                               TextSpan(
-                                  text: '${Utils.truncate(song.title, 25)}\n'),
+                                  text: '${truncate(song.title, 25)}\n'),
                               TextSpan(
-                                  text: '${Utils.truncate(song.artist, 28)}',
+                                  text: '${truncate(song.artist, 28)}',
                                   style: TextStyle(
                                       color: secondaryText,
                                       fontSize: AppFont.md - 3,

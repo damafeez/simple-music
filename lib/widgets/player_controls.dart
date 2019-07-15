@@ -11,9 +11,9 @@ class PlayerControls extends StatelessWidget {
   Widget build(BuildContext context) {
     final isPlaying = musicEngine.playerState == PlayerState.playing;
     final currentIndex = musicEngine.currentSongIndex;
-    final hasNextSong = musicEngine.currentSongIndex < musicEngine.length - 1;
-    final hasPrevSong = musicEngine.currentSongIndex > 0;
-
+    final hasNextSong = currentIndex < musicEngine.length - 1;
+    final hasPrevSong = currentIndex > 0;
+    
     return Container(
       padding: EdgeInsets.symmetric(vertical: AppSpace.sm - 5),
       child: Row(
@@ -23,9 +23,9 @@ class PlayerControls extends StatelessWidget {
             icon: Icon(
               Icons.favorite,
               size: 22,
-              color: secondaryText.withOpacity(0.5),
+              color: musicEngine.songs[currentIndex].isFavorite ? Colors.red.withOpacity(0.8) : secondaryText.withOpacity(0.5),
             ),
-            onPressed: () => null,
+            onPressed: () => musicEngine.makeFavorite(currentIndex),
           ),
           IconButton(
             icon: Icon(

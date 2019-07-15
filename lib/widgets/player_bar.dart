@@ -27,9 +27,9 @@ class PlayerBar extends StatelessWidget {
                     fontSize: AppFont.md - 3,
                   ),
                   children: <TextSpan>[
-                    TextSpan(text: '${Utils.truncate(title, 40)}\n'),
+                    TextSpan(text: '${truncate(title, 40)}\n'),
                     TextSpan(
-                        text: '${Utils.truncate(artist, 25)}',
+                        text: '${truncate(artist, 25)}',
                         style: TextStyle(
                             color: secondaryText,
                             fontSize: AppFont.sm,

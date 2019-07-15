@@ -84,7 +84,6 @@ class Tracks extends StatelessWidget {
           child: ListView.builder(
             key: PageStorageKey<String>('Tracks'),
             itemCount: musicEngine.songs.length,
-            physics: BouncingScrollPhysics(),
             itemBuilder: (BuildContext context, int index) => InkWell(
                   onTap: () {
                     musicEngine.play(index);
@@ -94,6 +93,10 @@ class Tracks extends StatelessWidget {
                     number: index + 1,
                     artist: musicEngine.songs[index].artist,
                     isActive: musicEngine.currentSongIndex == index,
+                    isFavorite: musicEngine.songs[index].isFavorite,
+                    onFavoriteIconTap: () {
+                      musicEngine.makeFavorite(index, source: MusicSource.tracks);
+                    },
                     isPlaying: musicEngine.playerState == PlayerState.playing,
                   ),
                 ),
@@ -113,7 +116,6 @@ class Playlists extends StatelessWidget {
       child: ListView.builder(
         key: PageStorageKey<String>('Playlist'),
         itemCount: 1,
-        physics: BouncingScrollPhysics(),
         itemBuilder: (BuildContext context, int index) => InkWell(
               onTap: () {},
               child: Container(

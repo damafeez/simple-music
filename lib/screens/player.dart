@@ -34,6 +34,7 @@ class Player extends StatelessWidget {
         return Scaffold(
           body: musicEngine.currentSongIndex < 0 ? Container() : ListView(
             controller: scrollController,
+            physics: NeverScrollableScrollPhysics(),
             padding: EdgeInsets.all(0.0),
             children: <Widget>[
               PlayerContainer(

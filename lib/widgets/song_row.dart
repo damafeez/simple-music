@@ -9,8 +9,17 @@ class SongRow extends StatelessWidget {
   final int number;
   final bool isActive;
   final bool isPlaying;
+  final bool isFavorite;
+  final Function onFavoriteIconTap;
   const SongRow(
-      {Key key, @required this.title, this.artist, @required this.number, this.isActive = false, this.isPlaying = false})
+      {Key key,
+      @required this.title,
+      this.artist,
+      @required this.number,
+      this.isActive = false,
+      this.isPlaying = false,
+      this.isFavorite,
+      this.onFavoriteIconTap})
       : super(key: key);
 
   @override
@@ -28,11 +37,16 @@ class SongRow extends StatelessWidget {
               width: AppSpace.lg,
               child: Align(
                 alignment: Alignment.centerLeft,
-                              child: isActive && isPlaying ? Icon(Icons.pause, size: AppFont.md + 2,) : Text(
-                  '$number',
-                  style:
-                      TextStyle(fontSize: AppFont.sm + 2, color: secondaryText),
-                ),
+                child: isActive && isPlaying
+                    ? Icon(
+                        Icons.pause,
+                        size: AppFont.md + 2,
+                      )
+                    : Text(
+                        '$number',
+                        style: TextStyle(
+                            fontSize: AppFont.sm + 2, color: secondaryText),
+                      ),
               ),
             ),
             Expanded(
@@ -45,9 +59,9 @@ class SongRow extends StatelessWidget {
                       fontSize: AppFont.md - 2,
                     ),
                     children: <TextSpan>[
-                      TextSpan(text: '${Utils.truncate(title, 28)}\n'),
+                      TextSpan(text: '${truncate(title, 28)}\n'),
                       TextSpan(
-                          text: '${Utils.truncate(artist, 40)}',
+                          text: '${truncate(artist, 40)}',
                           style: TextStyle(
                               color: secondaryText,
                               fontSize: AppFont.sm,
@@ -59,10 +73,10 @@ class SongRow extends StatelessWidget {
               padding: const EdgeInsets.all(0.0),
               width: 25.0,
               child: IconButton(
-                icon: Icon(Icons.favorite_border),
+                icon: Icon(isFavorite ? Icons.favorite : Icons.favorite_border),
                 iconSize: AppFont.md - 3,
-                onPressed: () {},
-                color: secondaryText,
+                onPressed: onFavoriteIconTap,
+                color: isFavorite ? Colors.red : secondaryText,
               ),
             ),
             Container(
