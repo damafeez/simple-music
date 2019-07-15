@@ -10,12 +10,11 @@ class MusicEngine extends ChangeNotifier {
   bool _songsLoading = false;
   ReplayMode _replayMode = ReplayMode.none;
   int currentSongIndex = -1;
+  int _currentSongId;
   PlayerState playerState = PlayerState.stopped;
   Set<int> _favorites = <int>{};
-  MusicSource musicSource = MusicSource.tracks;
+  PlayingFrom playingFrom = PlayingFrom.tracks;
   List<SimpleSong> _songs = <SimpleSong>[];
-  Map<MusicSource, List<SimpleSong>> collection =
-      <MusicSource, List<SimpleSong>>{};
   LocalStore _localStore;
 
   MusicEngine()
@@ -25,22 +24,58 @@ class MusicEngine extends ChangeNotifier {
   }
 
   MusicFinder get audioPlayer => _audioPlayer;
-  int get length => _songs.length;
+  int get length => upNext().length;
   bool get songsLoading => _songsLoading;
   ReplayMode get replayMode => _replayMode;
-  List<SimpleSong> get songs => collection[musicSource];
-  Set<int> get favorites => _favorites;
+  int get currentSongId => _currentSongId;
+
+  List<SimpleSong> get tracks => _songs;
+  List<SimpleSong> get favorites =>
+      _songs.where((SimpleSong song) => song.isFavorite).toList();
+
+  List<SimpleSong> upNext({PlayingFrom musicSource}) {
+    musicSource ??= playingFrom;
+    switch (musicSource) {
+      case PlayingFrom.favorites:
+        return favorites;
+
+      case PlayingFrom.tracks:
+      default:
+        return tracks;
+    }
+  }
+
+  SimpleSong findSongById(int id) {
+    return _songs.firstWhere((SimpleSong song) => song.id == id);
+  }
+
+  SimpleSong get currentSong {
+    if (_currentSongId != null) return findSongById(_currentSongId);
+    return null;
+  }
+
+  void setCurrentSongId(int id) {
+    _currentSongId = id;
+
+    notifyListeners();
+  }
 
   void setReplayMode(ReplayMode mode, {int index}) {
     _replayMode = mode;
 
     notifyListeners();
-    if(index != null) {
+    if (index != null) {
       _localStore.writeReplayModeIndex(index);
     }
   }
 
-
+  void switchReplayMode() {
+    final values = ReplayMode.values;
+    int currentIndex = values.indexOf(replayMode);
+    int newIndex = currentIndex == values.length - 1 ? 0 : currentIndex + 1;
+    final ReplayMode nextMode = values[newIndex];
+    setReplayMode(nextMode, index: newIndex);
+  }
 
   Future getFavoritesFromDevice() async {
     try {
@@ -51,14 +86,12 @@ class MusicEngine extends ChangeNotifier {
     }
   }
 
-  void makeFavorite(int index, {MusicSource source}) {
-    source ??= musicSource;
-    final bool isFavorite = !collection[source][index].isFavorite;
-    int id = collection[source][index].id;
-    collection[source][index].isFavorite = isFavorite;
+  void makeFavorite(int index, {PlayingFrom source, bool isId = false}) {
+    final SimpleSong song =
+        isId ? findSongById(index) : upNext(musicSource: source)[index];
+    song.isFavorite = !song.isFavorite;
 
-    isFavorite ? _favorites.add(id) : _favorites.remove(id);
-
+    song.isFavorite ? _favorites.add(song.id) : _favorites.remove(song.id);
     notifyListeners();
     _localStore.writeFavorites(jsonEncode(List.from(_favorites)));
   }
@@ -90,38 +123,47 @@ class MusicEngine extends ChangeNotifier {
     }
   }
 
-  Future playSong(int index, {bool shouldStop = true}) async {
-    final song = songs[index];
+  Future playSong(int index,
+      {PlayingFrom musicSource, bool shouldStop = true}) async {
+    final song = upNext(musicSource: musicSource)[index];
     if (song != null) {
       if (shouldStop && playerState != PlayerState.stopped) {
         await stop();
       }
-      final result = await _audioPlayer.play(song?.uri, isLocal: true);
+      final result = await _audioPlayer?.play(song?.uri, isLocal: true);
 
       if (result == 1) {
         playerState = PlayerState.playing;
-
+        if (musicSource != null) playingFrom = musicSource;
         currentSongIndex = index;
+        setCurrentSongId(song.id);
+
         notifyListeners();
 
         // TODO: This shouldn't be happening everytime the song changes
         // better when the app is about to stop
+        final playingFromValues = PlayingFrom.values;
+        final int playingFromIndex = playingFromValues.indexOf(playingFrom);
+        _localStore.writeMusicSourceIndex(playingFromIndex);
         _localStore.writeCurrentSongIndex(index);
+        // 
+      } else {
+        currentSongIndex = -1;
       }
     }
   }
 
-  void play(int index) {
+  void play(int index, {PlayingFrom musicSource}) {
     if (index == currentSongIndex)
       playerState == PlayerState.playing
           ? pause()
-          : playSong(index, shouldStop: false);
+          : playSong(index, musicSource: musicSource, shouldStop: false);
     else
-      playSong(index);
+      playSong(index, musicSource: musicSource);
   }
 
   Future pause() async {
-    final result = await _audioPlayer.pause();
+    final result = await _audioPlayer?.pause();
     if (result == 1) {
       playerState = PlayerState.paused;
 
@@ -130,7 +172,7 @@ class MusicEngine extends ChangeNotifier {
   }
 
   Future stop() async {
-    final result = await _audioPlayer.stop();
+    final result = await _audioPlayer?.stop();
     if (result == 1) {
       playerState = PlayerState.stopped;
 
@@ -156,21 +198,38 @@ class MusicEngine extends ChangeNotifier {
         .toList()
           ..sort(_sortSongByTitle);
 
-    collection[MusicSource.tracks] = _songs;
     _songsLoading = false;
-
-    notifyListeners();
 
     // TODO: these shouldn't be happening everytime music refreshes
     try {
       currentSongIndex = _localStore.getCurrentSongIndex();
-      final replayModeValues = ReplayMode.values;
-      final replayMode = replayModeValues[_localStore.getReplayModeIndex()];
+      playingFrom = PlayingFrom.values[_localStore.getMusicSourceIndex()];
+      final replayMode = ReplayMode.values[_localStore.getReplayModeIndex()];
       setReplayMode(replayMode);
+      if (currentSongIndex >= 0)
+        setCurrentSongId(upNext()[currentSongIndex].id);
     } catch (e) {
       print('$e');
       setReplayMode(ReplayMode.none, index: 0);
+      currentSongIndex = -1;
     }
+
+    notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    // TODO: music state persistence should be done in persist
+    // this method should be called when the app unmounts
+    print('dispose was called=============');
+    _localStore.writeCurrentSongIndex(currentSongIndex);
+
+    final playingFromValues = PlayingFrom.values;
+    final int playingFromIndex = playingFromValues.indexOf(playingFrom);
+    _localStore.writeMusicSourceIndex(playingFromIndex);
+    stop();
+
+    super.dispose();
   }
 }
 
@@ -184,7 +243,7 @@ enum PlayerState {
   playing,
   paused,
 }
-enum MusicSource {
+enum PlayingFrom {
   tracks,
   favorites,
 }

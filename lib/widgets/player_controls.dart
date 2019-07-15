@@ -13,7 +13,7 @@ class PlayerControls extends StatelessWidget {
     final currentIndex = musicEngine.currentSongIndex;
     final hasNextSong = currentIndex < musicEngine.length - 1;
     final hasPrevSong = currentIndex > 0;
-    
+
     return Container(
       padding: EdgeInsets.symmetric(vertical: AppSpace.sm - 5),
       child: Row(
@@ -23,9 +23,12 @@ class PlayerControls extends StatelessWidget {
             icon: Icon(
               Icons.favorite,
               size: 22,
-              color: musicEngine.songs[currentIndex].isFavorite ? Colors.red.withOpacity(0.8) : secondaryText.withOpacity(0.5),
+              color: musicEngine.currentSong.isFavorite
+                  ? Colors.red.withOpacity(0.8)
+                  : secondaryText.withOpacity(0.5),
             ),
-            onPressed: () => musicEngine.makeFavorite(currentIndex),
+            onPressed: () => musicEngine
+                .makeFavorite(musicEngine.currentSong.id, isId: true),
           ),
           IconButton(
             icon: Icon(
@@ -52,20 +55,15 @@ class PlayerControls extends StatelessWidget {
           ),
           IconButton(
             icon: Icon(
-              musicEngine.replayMode == ReplayMode.one ? Icons.repeat_one : Icons.repeat,
+              musicEngine.replayMode == ReplayMode.one
+                  ? Icons.repeat_one
+                  : Icons.repeat,
               size: 22.0,
-              color:
-                  musicEngine.replayMode == ReplayMode.none ? secondaryText.withOpacity(0.5) : null,
+              color: musicEngine.replayMode == ReplayMode.none
+                  ? secondaryText.withOpacity(0.5)
+                  : null,
             ),
-            onPressed: () {
-              // TODO: Refactor, this logic should
-              // be implemented within MusicEngine
-              final values = ReplayMode.values;
-              int currentIndex = values.indexOf(musicEngine.replayMode);
-              int newIndex = currentIndex == values.length - 1 ? 0 : currentIndex + 1;
-              final ReplayMode nextMode = values[newIndex];
-              musicEngine.setReplayMode(nextMode, index: newIndex);
-            },
+            onPressed: musicEngine.switchReplayMode,
           ),
         ],
       ),

@@ -5,6 +5,7 @@ class LocalStore {
   final String favoritesKey = 'favorites';
   final String currentSong = 'current_song_index';
   final String replayMode = 'replay_mode_index';
+  final String playingFrom = 'playing_from_index';
 
   LocalStore() {
     SharedPreferences.getInstance().then((instance) {
@@ -34,6 +35,14 @@ class LocalStore {
 
   Future<bool> writeReplayModeIndex(int index) {
     return prefs.setInt(replayMode, index);
+  }
+
+  int getMusicSourceIndex() {
+    return prefs.getInt(playingFrom) ?? 0;
+  }
+
+  Future<bool> writeMusicSourceIndex(int index) {
+    return prefs.setInt(playingFrom, index);
   }
 }
 

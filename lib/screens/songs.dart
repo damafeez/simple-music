@@ -75,7 +75,7 @@ class Tracks extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Consumer<MusicEngine>(builder: (context, musicEngine, child) {
-      if (musicEngine.songsLoading && musicEngine.songs == null)
+      if (musicEngine.songsLoading && musicEngine.tracks == null)
         return CircularProgressIndicator();
       return Scrollbar(
         child: SafeArea(
@@ -83,19 +83,22 @@ class Tracks extends StatelessWidget {
           bottom: false,
           child: ListView.builder(
             key: PageStorageKey<String>('Tracks'),
-            itemCount: musicEngine.songs.length,
+            itemCount: musicEngine.tracks.length,
             itemBuilder: (BuildContext context, int index) => InkWell(
                   onTap: () {
-                    musicEngine.play(index);
+                    musicEngine.play(index, musicSource: PlayingFrom.tracks);
                   },
                   child: SongRow(
-                    title: musicEngine.songs[index].title,
+                    title: musicEngine.tracks[index].title,
                     number: index + 1,
-                    artist: musicEngine.songs[index].artist,
-                    isActive: musicEngine.currentSongIndex == index,
-                    isFavorite: musicEngine.songs[index].isFavorite,
+                    artist: musicEngine.tracks[index].artist,
+                    isActive: musicEngine.currentSongId ==
+                            musicEngine.tracks[index].id &&
+                        musicEngine.playingFrom == PlayingFrom.tracks,
+                    isFavorite: musicEngine.tracks[index].isFavorite,
                     onFavoriteIconTap: () {
-                      musicEngine.makeFavorite(index, source: MusicSource.tracks);
+                      musicEngine.makeFavorite(index,
+                          source: PlayingFrom.tracks);
                     },
                     isPlaying: musicEngine.playerState == PlayerState.playing,
                   ),

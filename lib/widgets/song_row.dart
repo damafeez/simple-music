@@ -11,16 +11,16 @@ class SongRow extends StatelessWidget {
   final bool isPlaying;
   final bool isFavorite;
   final Function onFavoriteIconTap;
-  const SongRow(
-      {Key key,
-      @required this.title,
-      this.artist,
-      @required this.number,
-      this.isActive = false,
-      this.isPlaying = false,
-      this.isFavorite,
-      this.onFavoriteIconTap})
-      : super(key: key);
+  const SongRow({
+    Key key,
+    @required this.title,
+    @required this.artist,
+    @required this.number,
+    this.isActive = false,
+    this.isPlaying = false,
+    this.isFavorite,
+    this.onFavoriteIconTap,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -69,16 +69,19 @@ class SongRow extends StatelessWidget {
                     ]),
               ),
             ),
-            Container(
-              padding: const EdgeInsets.all(0.0),
-              width: 25.0,
-              child: IconButton(
-                icon: Icon(isFavorite ? Icons.favorite : Icons.favorite_border),
-                iconSize: AppFont.md - 3,
-                onPressed: onFavoriteIconTap,
-                color: isFavorite ? Colors.red : secondaryText,
-              ),
-            ),
+            isFavorite == null
+                ? Container()
+                : Container(
+                    padding: const EdgeInsets.all(0.0),
+                    width: 25.0,
+                    child: IconButton(
+                      icon: Icon(
+                          isFavorite ? Icons.favorite : Icons.favorite_border),
+                      iconSize: AppFont.md - 3,
+                      onPressed: onFavoriteIconTap,
+                      color: isFavorite ? Colors.red : secondaryText,
+                    ),
+                  ),
             Container(
               padding: const EdgeInsets.all(0.0),
               width: 40.0,

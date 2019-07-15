@@ -73,7 +73,7 @@ class _PlayerContainerState extends State<PlayerContainer>
   @override
   void dispose() {
     dragAutoCompleteAnimationController.dispose();
-    widget.viewModel.musicEngine.stop();
+    widget.viewModel.musicEngine.dispose();
     super.dispose();
   }
 
@@ -152,8 +152,7 @@ class _PlayerContainerState extends State<PlayerContainer>
 
   @override
   Widget build(BuildContext context) {
-    final int currentSongIndex = widget.viewModel.musicEngine.currentSongIndex;
-    final Song song = widget.viewModel.musicEngine.songs[currentSongIndex];
+    final Song song = widget.viewModel.musicEngine.currentSong;
     return GestureDetector(
       onVerticalDragStart: _onPanStart,
       onVerticalDragUpdate: _onPanUpdate,
