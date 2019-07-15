@@ -58,12 +58,13 @@ class PlayerControls extends StatelessWidget {
                   musicEngine.replayMode == ReplayMode.none ? secondaryText.withOpacity(0.5) : null,
             ),
             onPressed: () {
+              // TODO: Refactor, this logic should
+              // be implemented within MusicEngine
               final values = ReplayMode.values;
               int currentIndex = values.indexOf(musicEngine.replayMode);
-              final ReplayMode nextMode = currentIndex == values.length - 1
-                  ? values[0]
-                  : values[currentIndex + 1];
-              musicEngine.setReplayMode(nextMode);
+              int newIndex = currentIndex == values.length - 1 ? 0 : currentIndex + 1;
+              final ReplayMode nextMode = values[newIndex];
+              musicEngine.setReplayMode(nextMode, index: newIndex);
             },
           ),
         ],

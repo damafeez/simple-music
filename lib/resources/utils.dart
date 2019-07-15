@@ -3,6 +3,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 class LocalStore {
   SharedPreferences prefs;
   final String favoritesKey = 'favorites';
+  final String currentSong = 'current_song_index';
+  final String replayMode = 'replay_mode_index';
 
   LocalStore() {
     SharedPreferences.getInstance().then((instance) {
@@ -16,6 +18,22 @@ class LocalStore {
 
   Future<bool> writeFavorites(String favorites) {
     return prefs.setString(favoritesKey, favorites);
+  }
+
+  int getCurrentSongIndex() {
+    return prefs.getInt(currentSong) ?? -1;
+  }
+
+  Future<bool> writeCurrentSongIndex(int index) {
+    return prefs.setInt(currentSong, index);
+  }
+
+  int getReplayModeIndex() {
+    return prefs.getInt(replayMode) ?? 0;
+  }
+
+  Future<bool> writeReplayModeIndex(int index) {
+    return prefs.setInt(replayMode, index);
   }
 }
 

@@ -31,17 +31,20 @@ class MusicEngine extends ChangeNotifier {
   List<SimpleSong> get songs => collection[musicSource];
   Set<int> get favorites => _favorites;
 
-  void setReplayMode(ReplayMode mode) {
+  void setReplayMode(ReplayMode mode, {int index}) {
     _replayMode = mode;
 
     notifyListeners();
+    if(index != null) {
+      _localStore.writeReplayModeIndex(index);
+    }
   }
 
-  
+
 
   Future getFavoritesFromDevice() async {
     try {
-      final favoritesArray = await _localStore.getFavorites();
+      final favoritesArray = _localStore.getFavorites();
       _favorites = Set.from(jsonDecode(favoritesArray));
     } catch (e) {
       await _localStore.writeFavorites(jsonEncode(List.from(_favorites)));
@@ -100,6 +103,10 @@ class MusicEngine extends ChangeNotifier {
 
         currentSongIndex = index;
         notifyListeners();
+
+        // TODO: This shouldn't be happening everytime the song changes
+        // better when the app is about to stop
+        _localStore.writeCurrentSongIndex(index);
       }
     }
   }
@@ -153,6 +160,17 @@ class MusicEngine extends ChangeNotifier {
     _songsLoading = false;
 
     notifyListeners();
+
+    // TODO: these shouldn't be happening everytime music refreshes
+    try {
+      currentSongIndex = _localStore.getCurrentSongIndex();
+      final replayModeValues = ReplayMode.values;
+      final replayMode = replayModeValues[_localStore.getReplayModeIndex()];
+      setReplayMode(replayMode);
+    } catch (e) {
+      print('$e');
+      setReplayMode(ReplayMode.none, index: 0);
+    }
   }
 }
 
