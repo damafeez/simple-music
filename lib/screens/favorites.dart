@@ -1,48 +1,54 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:simple_music_player/data/store/music_engine.dart';
+import 'package:simple_music_player/resources/assets.dart';
 import 'package:simple_music_player/resources/colors.dart';
+import 'package:simple_music_player/resources/sizes.dart';
 import 'package:simple_music_player/widgets/song_row.dart';
+
+import "package:flare_flutter/flare_actor.dart";
 
 class Favorites extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: NestedScrollView(
-        headerSliverBuilder: (BuildContext context, bool boxIsScrolled) {
-          return <Widget>[
-            SliverAppBar(
-              backgroundColor: background,
-              title: Text(
-                'Favorites',
-                style: TextStyle(color: accentText),
-              ),
-              floating: true,
-              pinned: true,
-              forceElevated: true,
-            ),
-          ];
-        },
-        body: Consumer<MusicEngine>(builder: (context, musicEngine, child) {
-          if (musicEngine.songsLoading) return CircularProgressIndicator();
-          return Scrollbar(
-            child: SafeArea(
-              top: false,
-              bottom: false,
-              child: ListView.builder(
-                itemCount: musicEngine.favorites.length,
-                itemBuilder: (BuildContext context, int index) => InkWell(
-                      key: PageStorageKey<int>(musicEngine.favorites[index].id),
+        appBar: AppBar(
+          title: Text(
+            'Favorites',
+            style: TextStyle(color: accentText),
+          ),
+          backgroundColor: background,
+        ),
+        body: Stack(
+          children: <Widget>[
+            Container(
+                child: FlareActor(
+              HEART_FLARE,
+              alignment: Alignment.center,
+              fit: BoxFit.contain,
+              color: secondary.withOpacity(0.5),
+              animation: 'bubble heart',
+            )),
+            Consumer<MusicEngine>(builder: (context, musicEngine, child) {
+              if (musicEngine.songsLoading) return CircularProgressIndicator();
+              return ListView.builder(
+                  padding: EdgeInsets.symmetric(vertical: AppSpace.sm),
+                  physics: BouncingScrollPhysics(),
+                  itemCount: musicEngine.favorites.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    final SimpleSong song = musicEngine.favorites[index];
+                    return InkWell(
+                      key: PageStorageKey<int>(song.id),
                       onTap: () {
-                        musicEngine.play(index,
-                            musicSource: PlayingFrom.favorites);
+                        musicEngine.playSong(song,
+                            musicSource: PlayingFrom.favorites, index: index);
                       },
                       child: SongRow(
-                        title: musicEngine.favorites[index].title,
+                        title: song.title,
                         number: index + 1,
-                        artist: musicEngine.favorites[index].artist,
+                        artist: song.artist,
                         isActive: musicEngine.currentSongId ==
-                                musicEngine.favorites[index].id &&
+                                song.id &&
                             musicEngine.playingFrom == PlayingFrom.favorites,
                         onFavoriteIconTap: () {
                           musicEngine.makeFavorite(index,
@@ -51,12 +57,10 @@ class Favorites extends StatelessWidget {
                         isPlaying:
                             musicEngine.playerState == PlayerState.playing,
                       ),
-                    ),
-              ),
-            ),
-          );
-        }),
-      ),
-    );
+                    );
+                  });
+            }),
+          ],
+        ));
   }
 }

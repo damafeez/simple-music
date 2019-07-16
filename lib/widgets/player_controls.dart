@@ -43,7 +43,7 @@ class PlayerControls extends StatelessWidget {
               size: 30.0,
             ),
             onPressed: () {
-              musicEngine.play(currentIndex);
+              musicEngine.toggleCurrentSong();
             },
           ),
           IconButton(

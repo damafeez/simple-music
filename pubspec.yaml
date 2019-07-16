@@ -19,7 +19,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-
+  
+  flare_flutter: ^1.5.4
   flute_music_player:
   shared_preferences:
   cupertino_icons: ^0.1.2

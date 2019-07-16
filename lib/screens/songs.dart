@@ -82,28 +82,29 @@ class Tracks extends StatelessWidget {
           top: false,
           bottom: false,
           child: ListView.builder(
-            key: PageStorageKey<String>('Tracks'),
-            itemCount: musicEngine.tracks.length,
-            itemBuilder: (BuildContext context, int index) => InkWell(
+              key: PageStorageKey<String>('Tracks'),
+              itemCount: musicEngine.tracks.length,
+              itemBuilder: (BuildContext context, int index) {
+                SimpleSong song = musicEngine.tracks[index];
+                return InkWell(
                   onTap: () {
-                    musicEngine.play(index, musicSource: PlayingFrom.tracks);
+                    musicEngine.playSong(song, musicSource: PlayingFrom.tracks, index: index);
                   },
                   child: SongRow(
-                    title: musicEngine.tracks[index].title,
+                    title: song.title,
                     number: index + 1,
-                    artist: musicEngine.tracks[index].artist,
-                    isActive: musicEngine.currentSongId ==
-                            musicEngine.tracks[index].id &&
+                    artist: song.artist,
+                    isActive: musicEngine.currentSongId == song.id &&
                         musicEngine.playingFrom == PlayingFrom.tracks,
-                    isFavorite: musicEngine.tracks[index].isFavorite,
+                    isFavorite: song.isFavorite,
                     onFavoriteIconTap: () {
                       musicEngine.makeFavorite(index,
                           source: PlayingFrom.tracks);
                     },
                     isPlaying: musicEngine.playerState == PlayerState.playing,
                   ),
-                ),
-          ),
+                );
+              }),
         ),
       );
     });

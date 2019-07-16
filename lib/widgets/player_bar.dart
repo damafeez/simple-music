@@ -42,7 +42,7 @@ class PlayerBar extends StatelessWidget {
           icon: Icon(musicEngine.playerState == PlayerState.playing ? Icons.pause :Icons.play_arrow),
           iconSize: AppFont.lg,
           onPressed: () {
-            musicEngine.play(musicEngine.currentSongIndex);
+            musicEngine.toggleCurrentSong();
           },
         ),
         IconButton(
