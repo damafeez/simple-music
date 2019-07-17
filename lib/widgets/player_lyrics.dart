@@ -11,11 +11,23 @@ class PlayerLyrics extends StatelessWidget {
   }) : super(key: key);
 
   List<TextSpan> _buildLyrics() {
+    // TODO: implement logic for unavalaible lyrics
+    return <TextSpan>[
+      TextSpan(
+          text:
+              'Seems the aliens played your song, they probably deleted its lyrics when they finished :(',
+          style: TextStyle(
+            color: secondaryText.withOpacity(0.7),
+            fontWeight: FontWeight.w600,
+            height: 1.2,
+            fontSize: AppFont.sm,
+          )),
+    ];
     List<TextSpan> _lyricsWidget = <TextSpan>[];
     final _lyrics = lyrics.formattedLyrics;
 
     for (int i = 0; i < _lyrics.length; i++) {
-      _lyricsWidget.add(new TextSpan(
+      _lyricsWidget.add(TextSpan(
         text: '${_lyrics[i]}\n',
         style: lyrics.activeIndex == i
             ? TextStyle(color: primary, fontWeight: FontWeight.w700)
