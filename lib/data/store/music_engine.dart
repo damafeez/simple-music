@@ -16,11 +16,16 @@ class MusicEngine extends ChangeNotifier {
   PlayingFrom _playingFrom = PlayingFrom.tracks;
   List<SimpleSong> _songs = <SimpleSong>[];
   LocalStore _localStore;
+  Duration _duration = Duration(seconds: 0);
+  Duration _position = Duration(seconds: 0);
 
   MusicEngine()
       : _audioPlayer = MusicFinder(),
         _localStore = LocalStore() {
-    _audioPlayer.setCompletionHandler(onComplete);
+    _audioPlayer
+      ..setCompletionHandler(onComplete)
+      ..setDurationHandler(setDuration)
+      ..setPositionHandler(setPosition);
   }
 
   PlayingFrom get playingFrom => _playingFrom;
@@ -31,6 +36,11 @@ class MusicEngine extends ChangeNotifier {
   ReplayMode get replayMode => _replayMode;
   int get currentSongIndex => _currentSongIndex;
   int get currentSongId => _currentSongId;
+  Duration get duration => Duration(
+      milliseconds: currentSong?.duration ?? _duration.inSeconds * 1000);
+  Duration get position => _position;
+  String get durationText => formatDuration(duration);
+  String get positionText => formatDuration(position);
 
   List<SimpleSong> get tracks => _songs;
   List<SimpleSong> get favorites =>
@@ -112,6 +122,22 @@ class MusicEngine extends ChangeNotifier {
     int newIndex = currentIndex == values.length - 1 ? 0 : currentIndex + 1;
     final ReplayMode nextMode = values[newIndex];
     setReplayMode(nextMode, index: newIndex);
+  }
+
+  void setDuration(Duration d) {
+    _duration = d;
+
+    notifyListeners();
+  }
+
+  void setPosition(Duration p) {
+    _position = p;
+
+    notifyListeners();
+  }
+
+  void seek(double percent) {
+    _audioPlayer.seek(duration.inSeconds * percent);
   }
 
   Future getFavoritesFromDevice() async {

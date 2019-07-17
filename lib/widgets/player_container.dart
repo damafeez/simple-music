@@ -250,7 +250,7 @@ class _PlayerContainerState extends State<PlayerContainer>
                           width: lerpDouble(width, collapsedAlbumArtWidth,
                               widget.viewModel.panPercent),
                           child: AspectRatio(
-                            aspectRatio: 1,
+                            aspectRatio: 1.05,
                             child: Container(
                               decoration: BoxDecoration(
                                 image: DecorationImage(
@@ -289,7 +289,8 @@ class _PlayerContainerState extends State<PlayerContainer>
                 child: Column(
                   children: <Widget>[
                     PlayerLyrics(lyrics: siaLyrics),
-                    PlayerTimeline(),
+                    SizedBox(height: AppSpace.sm,),
+                    PlayerTimeline(musicEngine: widget.viewModel.musicEngine),
                     PlayerControls(musicEngine: widget.viewModel.musicEngine),
                   ],
                 ),

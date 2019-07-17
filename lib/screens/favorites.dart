@@ -37,19 +37,23 @@ class Favorites extends StatelessWidget {
                   itemCount: musicEngine.favorites.length,
                   itemBuilder: (BuildContext context, int index) {
                     final SimpleSong song = musicEngine.favorites[index];
+                    final bool isActive =
+                        musicEngine.currentSongId == song.id &&
+                            musicEngine.playingFrom == PlayingFrom.favorites;
                     return InkWell(
                       key: PageStorageKey<int>(song.id),
                       onTap: () {
-                        musicEngine.playSong(song,
-                            musicSource: PlayingFrom.favorites, index: index);
+                        isActive
+                            ? musicEngine.toggleCurrentSong()
+                            : musicEngine.playSong(song,
+                                musicSource: PlayingFrom.favorites,
+                                index: index);
                       },
                       child: SongRow(
                         title: song.title,
                         number: index + 1,
                         artist: song.artist,
-                        isActive: musicEngine.currentSongId ==
-                                song.id &&
-                            musicEngine.playingFrom == PlayingFrom.favorites,
+                        isActive: isActive,
                         onFavoriteIconTap: () {
                           musicEngine.makeFavorite(index,
                               source: PlayingFrom.favorites);

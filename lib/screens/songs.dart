@@ -85,17 +85,21 @@ class Tracks extends StatelessWidget {
               key: PageStorageKey<String>('Tracks'),
               itemCount: musicEngine.tracks.length,
               itemBuilder: (BuildContext context, int index) {
-                SimpleSong song = musicEngine.tracks[index];
+                final SimpleSong song = musicEngine.tracks[index];
+                final bool isActive = musicEngine.currentSongId == song.id &&
+                    musicEngine.playingFrom == PlayingFrom.tracks;
                 return InkWell(
                   onTap: () {
-                    musicEngine.playSong(song, musicSource: PlayingFrom.tracks, index: index);
+                    isActive
+                        ? musicEngine.toggleCurrentSong()
+                        : musicEngine.playSong(song,
+                            musicSource: PlayingFrom.tracks, index: index);
                   },
                   child: SongRow(
                     title: song.title,
                     number: index + 1,
                     artist: song.artist,
-                    isActive: musicEngine.currentSongId == song.id &&
-                        musicEngine.playingFrom == PlayingFrom.tracks,
+                    isActive: isActive,
                     isFavorite: song.isFavorite,
                     onFavoriteIconTap: () {
                       musicEngine.makeFavorite(index,

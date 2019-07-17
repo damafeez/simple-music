@@ -47,8 +47,20 @@ class LocalStore {
 }
 
 String truncate(String string, int length) {
-    final _string = string.replaceAll(RegExp('\n'), ' ');
-    final truncated =
-        '${_string.substring(0, length > _string.length ? _string.length : length).trim()}...';
-    return _string.length <= truncated.length ? _string : truncated;
+  final _string = string.replaceAll(RegExp('\n'), ' ');
+  final truncated =
+      '${_string.substring(0, length > _string.length ? _string.length : length).trim()}...';
+  return _string.length <= truncated.length ? _string : truncated;
+}
+
+String formatDuration(Duration duration) {
+  if (duration == null) return '';
+  final int hours = duration.inHours;
+  final int minutes = duration.inMinutes % 60;
+  final int seconds = duration.inSeconds % 60;
+
+  final _hours = hours > 0 ? '$hours:' : '';
+  final _seconds = seconds > 9 ? '$seconds' : '0$seconds';
+
+  return '$_hours$minutes:$_seconds';
 }
