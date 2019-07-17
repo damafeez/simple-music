@@ -1,4 +1,8 @@
+import 'dart:io';
+
+import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:simple_music_player/resources/assets.dart';
 
 class LocalStore {
   SharedPreferences prefs;
@@ -63,4 +67,13 @@ String formatDuration(Duration duration) {
   final _seconds = seconds > 9 ? '$seconds' : '0$seconds';
 
   return '$_hours$minutes:$_seconds';
+}
+
+ImageProvider buildAlbumArt(String albumArt) {
+  try {
+    if (albumArt == null) throw 'no albumArt';
+    return FileImage(File.fromUri(Uri.parse(albumArt)));
+  } catch (e) {
+    return ExactAssetImage(ALBUM_PLACEHOLDER);
+  }
 }

@@ -1,13 +1,11 @@
 import 'dart:async';
 import 'dart:ui';
-import 'dart:io';
 
 import 'package:flute_music_player/flute_music_player.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:simple_music_player/data/fixtures/lyrics.dart';
 import 'package:simple_music_player/data/store/music_engine.dart';
-import 'package:simple_music_player/resources/assets.dart';
 import 'package:simple_music_player/resources/colors.dart';
 import 'package:simple_music_player/resources/sizes.dart';
 import 'package:simple_music_player/resources/utils.dart';
@@ -68,19 +66,18 @@ class _PlayerContainerState extends State<PlayerContainer>
         default:
       }
     });
+    super.initState();
   }
 
   @override
   void dispose() {
     dragAutoCompleteAnimationController.dispose();
-    widget.viewModel.musicEngine.dispose();
     super.dispose();
   }
 
   bool _gestureDisabled() {
     return (widget.viewModel.scaffoldScrollController.offset !=
-            widget
-                .viewModel.scaffoldScrollController.position.minScrollExtent);
+        widget.viewModel.scaffoldScrollController.position.minScrollExtent);
   }
 
   void _onPanStart(DragStartDetails details) {
@@ -127,6 +124,10 @@ class _PlayerContainerState extends State<PlayerContainer>
   }
 
   void _animateContainer({open = true}) {
+    // TODO: REFACTOR: this logic could be handled more elegantly
+    if (widget.viewModel.scaffoldScrollController.offset !=
+        widget.viewModel.scaffoldScrollController.position.minScrollExtent)
+      widget.viewModel.scrollToTop(scrollToTop: true);
     if ((open && widget.viewModel.panPercent == 0.0) ||
         (!open && widget.viewModel.panPercent == 1.0)) return;
 
@@ -198,8 +199,7 @@ class _PlayerContainerState extends State<PlayerContainer>
                               fontSize: AppFont.md,
                             ),
                             children: <TextSpan>[
-                              TextSpan(
-                                  text: '${truncate(song.title, 25)}\n'),
+                              TextSpan(text: '${truncate(song.title, 25)}\n'),
                               TextSpan(
                                   text: '${truncate(song.artist, 28)}',
                                   style: TextStyle(
@@ -254,18 +254,19 @@ class _PlayerContainerState extends State<PlayerContainer>
                             child: Container(
                               decoration: BoxDecoration(
                                 image: DecorationImage(
-                                  image: song.albumArt != null
-                                      ? FileImage(File.fromUri(
-                                          Uri.parse(song.albumArt)))
-                                      : ExactAssetImage(ALBUM_PLACEHOLDER),
+                                  image: buildAlbumArt(song.albumArt),
                                   fit: BoxFit.cover,
                                 ),
                                 borderRadius: BorderRadius.circular(5.0),
                                 boxShadow: [
                                   BoxShadow(
                                     color: albumArtShadowColor,
-                                    blurRadius: (30 * (1 - widget.viewModel.panPercent)),
-                                    offset: Offset(0.0, 10.0 * (1 - widget.viewModel.panPercent)),
+                                    blurRadius: (30 *
+                                        (1 - widget.viewModel.panPercent)),
+                                    offset: Offset(
+                                        0.0,
+                                        10.0 *
+                                            (1 - widget.viewModel.panPercent)),
                                   )
                                 ],
                               ),
@@ -289,7 +290,9 @@ class _PlayerContainerState extends State<PlayerContainer>
                 child: Column(
                   children: <Widget>[
                     PlayerLyrics(lyrics: siaLyrics),
-                    SizedBox(height: AppSpace.sm,),
+                    SizedBox(
+                      height: AppSpace.sm,
+                    ),
                     PlayerTimeline(musicEngine: widget.viewModel.musicEngine),
                     PlayerControls(musicEngine: widget.viewModel.musicEngine),
                   ],
@@ -309,6 +312,7 @@ class PlayerContainerViewModel {
   final ScrollController scaffoldScrollController;
   final StreamController<NavigationLogicEvents> navigationLogicEvents;
   final MusicEngine musicEngine;
+  final Function scrollToTop;
 
   PlayerContainerViewModel({
     @required this.panPercent,
@@ -316,6 +320,7 @@ class PlayerContainerViewModel {
     @required this.scaffoldScrollController,
     @required this.navigationLogicEvents,
     @required this.musicEngine,
+    @required this.scrollToTop,
   });
 }
 

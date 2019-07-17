@@ -66,7 +66,7 @@ class _NavigationLogicState extends State<NavigationLogic> {
       return WillPopScope(
         onWillPop: () => Future(() {
               if (panPercent == 1.0) {
-                return true;
+                return false;
               } else {
                 navigationLogicEvents.add(NavigationLogicEvents.collapsePlayer);
               }

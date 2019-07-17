@@ -1,22 +1,22 @@
 import 'package:flutter/material.dart';
-import 'package:simple_music_player/resources/assets.dart';
+import 'package:simple_music_player/data/store/music_engine.dart';
 import 'package:simple_music_player/resources/colors.dart';
 import 'package:simple_music_player/resources/sizes.dart';
+import 'package:simple_music_player/widgets/upnext_row.dart';
 
 class PlayerUpNext extends StatelessWidget {
-  final onPlaylistTap;
+  final Function onPlaylistTap;
+  final MusicEngine musicEngine;
   const PlayerUpNext({
     Key key,
     this.onPlaylistTap,
+    this.musicEngine,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Container(
       height: MediaQuery.of(context).size.height - 200,
-      padding: EdgeInsets.only(
-        top: 10,
-      ),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.only(
@@ -35,91 +35,59 @@ class PlayerUpNext extends StatelessWidget {
         top: false,
         child: Column(
           children: <Widget>[
-            Material(
-              color: Colors.transparent,
-              child: Row(
-                children: <Widget>[
-                  SizedBox(
-                    width: AppSpace.sm,
-                  ),
-                  Text(
-                    'Up Next',
-                    style: TextStyle(
-                        color: secondaryText, fontWeight: FontWeight.w600),
-                  ),
-                  Expanded(
-                    child: Container(),
-                  ),
-                  IconButton(
-                    onPressed: onPlaylistTap,
-                    icon: Icon(
-                      Icons.playlist_play,
+            InkWell(
+              onTap: onPlaylistTap,
+              child: Container(
+                padding: EdgeInsets.only(
+                  top: 10,
+                ),
+                child: Row(
+                  children: <Widget>[
+                    SizedBox(
+                      width: AppSpace.sm,
+                    ),
+                    Text(
+                      'Up Next',
+                      style: TextStyle(
+                          color: secondaryText, fontWeight: FontWeight.w600),
+                    ),
+                    Expanded(
+                      child: Container(),
+                    ),
+                    IconButton(
+                      onPressed: () {},
+                      icon: Icon(
+                        Icons.shuffle,
+                      ),
                       color: secondaryText,
                     ),
-                    iconSize: 30,
-                  ),
-                  SizedBox(
-                    width: 10,
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
             Expanded(
               child: ListView.builder(
-                itemCount: 15,
-                key: PageStorageKey<String>('Up Next'),
-                physics: BouncingScrollPhysics(),
-                padding: EdgeInsets.symmetric(
-                  horizontal: AppSpace.sm,
-                ),
-                itemBuilder: (BuildContext context, int index) => ListTile(
-                      onTap: () => null,
-                      leading: Container(
-                        height: 50,
-                        width: 50,
-                        decoration: BoxDecoration(
-                          image: DecorationImage(
-                            image: ExactAssetImage(SIA),
-                            fit: BoxFit.cover,
-                          ),
-                          borderRadius: BorderRadius.circular(3.0),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Color.fromRGBO(50, 50, 50, 0.3),
-                              blurRadius: 10,
-                              offset: Offset(1.0, 1.0),
-                            )
-                          ],
-                        ),
-                      ),
-                      title: Text(
-                        'Twentyone Pilots',
-                        style: TextStyle(
-                          fontWeight: FontWeight.w700,
-                          color: secondaryText,
-                          fontSize: AppFont.md - 3,
-                        ),
-                      ),
-                      subtitle: Text(
-                        'Honour and Us',
-                        style: TextStyle(
-                          fontWeight: FontWeight.w500,
-                          fontSize: AppFont.sm,
-                          color: Colors.grey,
-                          height: 1.5,
-                        ),
-                      ),
-                      trailing: Text(
-                        '03:37',
-                        style: TextStyle(
-                          fontWeight: FontWeight.w600,
-                          color: Colors.grey,
-                          fontSize: AppFont.sm + 1,
-                        ),
-                      ),
-                      contentPadding: EdgeInsets.symmetric(horizontal: 0),
-                    ),
-              ),
+                  itemCount:
+                      musicEngine.length - (musicEngine.currentSongIndex + 1) >
+                              20
+                          ? 20
+                          : musicEngine.length - (musicEngine.currentSongIndex + 1),
+                  key: PageStorageKey<String>('Up Next'),
+                  physics: BouncingScrollPhysics(),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: AppSpace.sm,
+                  ),
+                  itemBuilder: (BuildContext context, int index) {
+                    SimpleSong song = musicEngine
+                        .upNext()[index + musicEngine.currentSongIndex + 1];
+                    return UpNextRow(
+                      title: song.title,
+                      artist: song.artist,
+                      albumArt: song.albumArt,
+                      duration: Duration(milliseconds: song.duration),
+                      onTap: () {},
+                    );
+                  }),
             ),
           ],
         ),

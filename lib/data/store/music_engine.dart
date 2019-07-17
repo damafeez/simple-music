@@ -16,7 +16,6 @@ class MusicEngine extends ChangeNotifier {
   PlayingFrom _playingFrom = PlayingFrom.tracks;
   List<SimpleSong> _songs = <SimpleSong>[];
   LocalStore _localStore;
-  Duration _duration = Duration(seconds: 0);
   Duration _position = Duration(seconds: 0);
 
   MusicEngine()
@@ -24,7 +23,6 @@ class MusicEngine extends ChangeNotifier {
         _localStore = LocalStore() {
     _audioPlayer
       ..setCompletionHandler(onComplete)
-      ..setDurationHandler(setDuration)
       ..setPositionHandler(setPosition);
   }
 
@@ -37,7 +35,7 @@ class MusicEngine extends ChangeNotifier {
   int get currentSongIndex => _currentSongIndex;
   int get currentSongId => _currentSongId;
   Duration get duration => Duration(
-      milliseconds: currentSong?.duration ?? _duration.inSeconds * 1000);
+      milliseconds: currentSong?.duration ?? 0);
   Duration get position => _position;
   String get durationText => formatDuration(duration);
   String get positionText => formatDuration(position);
@@ -124,20 +122,15 @@ class MusicEngine extends ChangeNotifier {
     setReplayMode(nextMode, index: newIndex);
   }
 
-  void setDuration(Duration d) {
-    _duration = d;
-
-    notifyListeners();
-  }
-
   void setPosition(Duration p) {
     _position = p;
 
     notifyListeners();
   }
 
-  void seek(double percent) {
-    _audioPlayer.seek(duration.inSeconds * percent);
+  Future seek(double percent) {
+    setPosition(Duration(milliseconds: (duration.inMilliseconds * percent).toInt()));
+    return _audioPlayer.seek(duration.inSeconds * percent);
   }
 
   Future getFavoritesFromDevice() async {
@@ -161,8 +154,6 @@ class MusicEngine extends ChangeNotifier {
 
   Future onComplete() {
     switch (replayMode) {
-      case ReplayMode.none:
-        return playNextSong();
       case ReplayMode.one:
         return play(currentSong);
       case ReplayMode.all:
@@ -170,7 +161,9 @@ class MusicEngine extends ChangeNotifier {
           return playSong(getSongByIndex(0), index: 0);
         }
         return playNextSong();
+      case ReplayMode.none:
       default:
+        return playNextSong();
     }
   }
 
@@ -179,6 +172,7 @@ class MusicEngine extends ChangeNotifier {
       int index = currentSongIndex + 1;
       return playSong(getSongByIndex(index), index: index);
     }
+    return null;
   }
 
   Future playPrevSong() {
@@ -186,6 +180,7 @@ class MusicEngine extends ChangeNotifier {
       int index = currentSongIndex - 1;
       return playSong(getSongByIndex(index), index: index);
     }
+    return null;
   }
 
   Future<int> play(SimpleSong song, {bool shouldStop = true}) async {
