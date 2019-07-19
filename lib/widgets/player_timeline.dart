@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:simple_music_player/data/store/music_engine.dart';
 import 'package:simple_music_player/resources/sizes.dart';
 import 'package:simple_music_player/resources/colors.dart';
+import 'package:simple_music_player/resources/utils.dart';
 
 class PlayerTimeline extends StatefulWidget {
   final MusicEngine musicEngine;
@@ -15,6 +16,14 @@ class PlayerTimeline extends StatefulWidget {
 class _PlayerTimelineState extends State<PlayerTimeline> {
   double seekValue = 0;
   bool isSeeking = false;
+
+  Duration get duration => widget.musicEngine.duration;
+  Duration get position {
+    return isSeeking
+        ? Duration(seconds: (seekValue * duration.inSeconds).toInt())
+        : widget.musicEngine.position;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -24,12 +33,12 @@ class _PlayerTimelineState extends State<PlayerTimeline> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: <Widget>[
-              Text('${widget.musicEngine.positionText}',
+              Text('${formatDuration(position)}',
                   style: TextStyle(
                     color: primary,
                     fontWeight: FontWeight.w700,
                   )),
-              Text('${widget.musicEngine.durationText}',
+              Text('${formatDuration(duration)}',
                   style: TextStyle(
                     color: secondaryText,
                     fontWeight: FontWeight.w700,
@@ -47,13 +56,9 @@ class _PlayerTimelineState extends State<PlayerTimeline> {
               overlayShape: RoundSliderOverlayShape(overlayRadius: 10.0),
             ),
             child: Slider(
-              value: isSeeking
-                  ? seekValue
-                  : (widget.musicEngine.duration.inSeconds == 0
-                      ? 0
-                      : (widget.musicEngine.position.inSeconds /
-                              widget.musicEngine.duration.inSeconds)
-                          .clamp(0.0, 1.0)),
+              value: duration.inSeconds == 0
+                  ? 0
+                  : (position.inSeconds / duration.inSeconds).clamp(0.0, 1.0),
               onChanged: (double value) {
                 setState(() {
                   seekValue = value;

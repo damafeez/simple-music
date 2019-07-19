@@ -37,8 +37,6 @@ class MusicEngine extends ChangeNotifier {
   Duration get duration => Duration(
       milliseconds: currentSong?.duration ?? 0);
   Duration get position => _position;
-  String get durationText => formatDuration(duration);
-  String get positionText => formatDuration(position);
 
   List<SimpleSong> get tracks => _songs;
   List<SimpleSong> get favorites =>
