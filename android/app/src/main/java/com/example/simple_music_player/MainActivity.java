@@ -1,4 +1,4 @@
-package com.example.simple_music_player;
+package com.afeez.awoyemi.simple_music_player;
 
 import android.os.Bundle;
 import io.flutter.app.FlutterActivity;
