@@ -1,16 +1,9 @@
 # simple_music_player
+A mobile music player for both android and IOS, built with Flutter.
 
-A new Flutter project.
+#  
+<img src="https://user-images.githubusercontent.com/26779819/61537580-653a1180-aa2f-11e9-9a7f-618f68f66211.png" height="300em" />  <img src="https://user-images.githubusercontent.com/26779819/61538053-84856e80-aa30-11e9-9a76-bcaaf5ce8ded.png" height="300em" />  <img src="https://user-images.githubusercontent.com/26779819/61537588-6c611f80-aa2f-11e9-859e-b52e3963f56c.png" height="300em" />
 
 ## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
-
-For help getting started with Flutter, view our 
-[online documentation](https://flutter.dev/docs), which offers tutorials, 
-samples, guidance on mobile development, and a full API reference.
+Please refer to the [Flutter docs (which offers tutorials, 
+samples, guidance on mobile development, and a full API reference.)](https://flutter.dev/docs) for information on how to setup the project and run the application.
