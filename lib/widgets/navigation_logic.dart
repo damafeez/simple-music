@@ -65,12 +65,11 @@ class _NavigationLogicState extends State<NavigationLogic> {
           : collapsedPlayerHeight + bottomBarHeight;
       return WillPopScope(
         onWillPop: () => Future(() {
-              if (panPercent == 1.0) {
-                return false;
-              } else {
-                navigationLogicEvents.add(NavigationLogicEvents.collapsePlayer);
-              }
-            }),
+          if (panPercent != 1.0) {
+            navigationLogicEvents.add(NavigationLogicEvents.collapsePlayer);
+          }
+          return false;
+        }),
         child: Stack(
           children: <Widget>[
             DecoratedBox(
@@ -115,8 +114,8 @@ class _NavigationLogicState extends State<NavigationLogic> {
                     type: BottomNavigationBarType.fixed,
                     currentIndex: bottomNavigationIndex,
                     onTap: (int index) => setState(() {
-                          bottomNavigationIndex = index;
-                        }),
+                      bottomNavigationIndex = index;
+                    }),
                     items: _buildBottomBarItems(),
                   ),
                 ),

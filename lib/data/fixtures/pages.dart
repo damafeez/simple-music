@@ -21,16 +21,16 @@ final List<Page> pages = <Page>[
     label: 'Favorites',
     widget: Favorites(),
   ),
-  Page(
-    icon: Icon(Icons.person),
-    label: 'Artists',
-    widget: Artists(),
-  ),
-  Page(
-    icon: Icon(Icons.album),
-    label: 'Albums',
-    widget: Albums(),
-  ),
+  // Page(
+  //   icon: Icon(Icons.person),
+  //   label: 'Artists',
+  //   widget: Artists(),
+  // ),
+  // Page(
+  //   icon: Icon(Icons.album),
+  //   label: 'Albums',
+  //   widget: Albums(),
+  // ),
 ];
 
 class Page {

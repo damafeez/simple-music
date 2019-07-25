@@ -188,7 +188,7 @@ class _PlayerContainerState extends State<PlayerContainer>
                     ),
                     Padding(
                       padding: EdgeInsets.only(
-                          top: AppSpace.md + 17, bottom: AppSpace.md),
+                          top: AppSpace.md + 12, bottom: AppSpace.md),
                       child: RichText(
                         textAlign: TextAlign.center,
                         text: TextSpan(
@@ -204,8 +204,9 @@ class _PlayerContainerState extends State<PlayerContainer>
                                   text: '${truncate(song.artist, 28)}',
                                   style: TextStyle(
                                       color: secondaryText,
-                                      fontSize: AppFont.md - 3,
-                                      height: 1.5)),
+                                      fontSize: AppFont.md - 5,
+                                      fontWeight: FontWeight.w500,
+                                      height: 1.2)),
                             ]),
                       ),
                     ),
@@ -221,7 +222,7 @@ class _PlayerContainerState extends State<PlayerContainer>
               ),
             ),
             Transform.translate(
-              offset: Offset(0, -110 * widget.viewModel.panPercent),
+              offset: Offset(0, -95 * widget.viewModel.panPercent),
               child: LayoutBuilder(
                 builder: (BuildContext context, BoxConstraints constraints) {
                   final width = constraints.maxWidth;
@@ -250,7 +251,7 @@ class _PlayerContainerState extends State<PlayerContainer>
                           width: lerpDouble(width, collapsedAlbumArtWidth,
                               widget.viewModel.panPercent),
                           child: AspectRatio(
-                            aspectRatio: 1.05,
+                            aspectRatio: MediaQuery.of(context).size.height < 695 ? 1.07 : 1.05,
                             child: Container(
                               decoration: BoxDecoration(
                                 image: DecorationImage(
@@ -284,14 +285,14 @@ class _PlayerContainerState extends State<PlayerContainer>
               child: Padding(
                 padding: EdgeInsets.only(
                   left: AppSpace.sm,
-                  top: AppSpace.md,
+                  top: AppSpace.sm,
                   right: AppSpace.sm,
                 ),
                 child: Column(
                   children: <Widget>[
                     PlayerLyrics(lyrics: siaLyrics),
                     SizedBox(
-                      height: AppSpace.sm,
+                      height: MediaQuery.of(context).size.height < 695 ? 0.0 : AppSpace.sm,
                     ),
                     PlayerTimeline(musicEngine: widget.viewModel.musicEngine),
                     PlayerControls(musicEngine: widget.viewModel.musicEngine),
